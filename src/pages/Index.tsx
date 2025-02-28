@@ -7,6 +7,7 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 import ResumeUpload from "@/components/ResumeUpload";
 import ProgressIndicator from "@/components/ProgressIndicator";
 import AnalysisResults from "@/components/AnalysisResults";
+import ContactSection from "@/components/ContactSection";
 import { analyzeResume } from "@/lib/analyzeResume";
 import { AnalysisData } from "@/components/AnalysisResults";
 import { toast } from "sonner";
@@ -96,6 +97,9 @@ const Index = () => {
                 <a href="#upload" className="text-foreground hover:text-primary transition-colors">
                   Analyze Resume
                 </a>
+                <a href="#contact" className="text-foreground hover:text-primary transition-colors">
+                  Contact
+                </a>
                 {user ? (
                   <div className="flex items-center gap-4">
                     <Link 
@@ -153,6 +157,13 @@ const Index = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Analyze Resume
+                </a>
+                <a 
+                  href="#contact" 
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Contact
                 </a>
                 {user ? (
                   <>
@@ -234,11 +245,17 @@ const Index = () => {
           </div>
         </section>
         
+        {/* Contact Section */}
+        <ContactSection />
+        
         {/* Footer */}
         <footer className="bg-card border-t py-8 mt-16">
           <div className="container mx-auto px-4 text-center">
             <p className="text-muted-foreground text-sm">
               © {new Date().getFullYear()} AI Resume Analyzer. All rights reserved.
+            </p>
+            <p className="text-muted-foreground text-sm mt-2">
+              Developed by Pallapolu Anjani Kumar
             </p>
           </div>
         </footer>

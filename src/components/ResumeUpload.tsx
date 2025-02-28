@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Upload, Clipboard, FileUp, X } from "lucide-react";
+import { FileText, Upload, Clipboard, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -13,6 +13,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState("");
+  const [fileUploaded, setFileUploaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -49,6 +50,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
     }
     
     setFileName(file.name);
+    setFileUploaded(true);
     
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -56,6 +58,8 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
       setResumeText(result);
     };
     reader.readAsText(file);
+    
+    toast.success("File uploaded successfully!");
   };
   
   const handlePaste = async () => {
@@ -64,6 +68,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
       if (text) {
         setResumeText(text);
         setFileName("Pasted text");
+        setFileUploaded(true);
         toast.success("Text pasted successfully!");
       } else {
         toast.error("No text found in clipboard");
@@ -76,6 +81,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
   const handleClearText = () => {
     setResumeText("");
     setFileName("");
+    setFileUploaded(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -99,7 +105,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <h2 className="text-3xl font-bold tracking-tight mb-4">Upload Your Resume</h2>
+        <h2 className="text-3xl font-bold tracking-tight mb-4 gradient-text">Upload Your Resume</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Upload your resume as a document or paste the text. Our AI will analyze it and provide detailed feedback.
         </p>
@@ -110,10 +116,10 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="bg-card rounded-xl border shadow-lg overflow-hidden"
+        className="bg-card cyber-border rounded-xl shadow-lg overflow-hidden"
       >
         <div className="p-6 md:p-8">
-          {!resumeText ? (
+          {!fileUploaded ? (
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -171,30 +177,25 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="border rounded-lg"
+                className="flex items-center justify-between bg-muted/30 p-6 rounded-lg border"
               >
-                <div className="flex items-center justify-between bg-muted p-3 rounded-t-lg">
-                  <div className="flex items-center gap-2">
-                    <FileUp className="w-4 h-4 text-primary" />
-                    <span className="font-medium truncate max-w-[200px]">{fileName}</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600 dark:text-green-400">
+                    <Check className="w-6 h-6" />
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={handleClearText}
-                    className="h-8 w-8"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                  <div>
+                    <h3 className="font-medium text-lg">File Uploaded Successfully</h3>
+                    <p className="text-sm text-muted-foreground">{fileName}</p>
+                  </div>
                 </div>
-                
-                <div className="p-4 max-h-[300px] overflow-y-auto">
-                  <textarea
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    className="w-full min-h-[200px] bg-transparent border-0 focus:ring-0 resize-none"
-                  />
-                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={handleClearText}
+                  className="h-8 w-8"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
               </motion.div>
             </AnimatePresence>
           )}
@@ -207,7 +208,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
           >
             <Button 
               onClick={handleSubmit}
-              disabled={!resumeText.trim()}
+              disabled={!fileUploaded}
               className="w-full sm:w-auto min-w-[200px]"
             >
               Analyze Resume

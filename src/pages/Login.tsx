@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { User, Lock, Mail, ArrowRight } from "lucide-react";
+import { User, Lock, Mail, ArrowRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -97,6 +98,18 @@ const Login = () => {
     }
   };
   
+  const handleGoogleLogin = () => {
+    // In a real application, you would verify the Google token
+    // and authenticate the user based on the Google response
+    toast.success("Google login successful!");
+    localStorage.setItem("user", JSON.stringify({ 
+      email: "user@gmail.com", 
+      role: "user",
+      provider: "google" 
+    }));
+    navigate("/dashboard");
+  };
+  
   return (
     <div className="min-h-screen flex items-center justify-center relative">
       <AnimatedBackground />
@@ -165,7 +178,36 @@ const Login = () => {
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
                 
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t"></span>
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  </div>
+                </div>
+                
+                <div className="flex justify-center">
+                  <div className="google-login-button w-full flex justify-center">
+                    <GoogleLogin
+                      onSuccess={() => handleGoogleLogin()}
+                      onError={() => toast.error("Google login failed")}
+                      useOneTap
+                    />
+                  </div>
+                </div>
+                
                 <div className="mt-6 text-center">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-4 text-sm">
+                    <div className="flex items-center gap-2 mb-1 text-blue-700 dark:text-blue-400">
+                      <Info className="w-4 h-4" />
+                      <span className="font-medium">Admin Login Credentials</span>
+                    </div>
+                    <p className="text-blue-600 dark:text-blue-300 text-xs">
+                      Email: admin@example.com<br />
+                      Password: admin123
+                    </p>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     Are you an admin?{" "}
                     <button
@@ -245,6 +287,25 @@ const Login = () => {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>
+                
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t"></span>
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Or register with</span>
+                  </div>
+                </div>
+                
+                <div className="flex justify-center">
+                  <div className="google-login-button w-full flex justify-center">
+                    <GoogleLogin
+                      onSuccess={() => handleGoogleLogin()}
+                      onError={() => toast.error("Google login failed")}
+                      useOneTap
+                    />
+                  </div>
+                </div>
               </form>
             </TabsContent>
           </Tabs>
