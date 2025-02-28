@@ -1,6 +1,7 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import Hero from "@/components/Hero";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import ResumeUpload from "@/components/ResumeUpload";
@@ -9,6 +10,8 @@ import AnalysisResults from "@/components/AnalysisResults";
 import { analyzeResume } from "@/lib/analyzeResume";
 import { AnalysisData } from "@/components/AnalysisResults";
 import { toast } from "sonner";
+import { Menu, X, User, LogIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Analysis steps
 const steps = [
@@ -19,9 +22,20 @@ const steps = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<AnalysisData | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    // Check if user is logged in
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   
   const handleResumeUpload = async (text: string) => {
     try {
@@ -52,11 +66,117 @@ const Index = () => {
     }
   };
   
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    toast.success("Logged out successfully");
+    setIsMenuOpen(false);
+  };
+  
   return (
     <div className="min-h-screen relative">
       <AnimatedBackground />
       
       <div className="relative z-10">
+        {/* Navigation Bar */}
+        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <Link to="/" className="text-xl font-bold gradient-text">
+                  ResumeAI
+                </Link>
+              </div>
+              
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center space-x-6">
+                <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
+                  How It Works
+                </a>
+                <a href="#upload" className="text-foreground hover:text-primary transition-colors">
+                  Analyze Resume
+                </a>
+                {user ? (
+                  <div className="flex items-center gap-4">
+                    <Link 
+                      to={user.role === "admin" ? "/admin" : "/dashboard"}
+                      className="text-foreground hover:text-primary transition-colors flex items-center gap-2"
+                    >
+                      <User className="w-4 h-4" />
+                      {user.role === "admin" ? "Admin" : "Dashboard"}
+                    </Link>
+                    <Button variant="outline" size="sm" onClick={handleLogout}>
+                      Logout
+                    </Button>
+                  </div>
+                ) : (
+                  <Link to="/login">
+                    <Button className="flex items-center gap-2">
+                      <LogIn className="w-4 h-4" />
+                      Login
+                    </Button>
+                  </Link>
+                )}
+              </nav>
+              
+              {/* Mobile Menu Button */}
+              <div className="md:hidden">
+                <button 
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="text-foreground p-2"
+                >
+                  {isMenuOpen ? <X /> : <Menu />}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Mobile Menu */}
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-card border-b"
+            >
+              <div className="container mx-auto px-4 py-4 space-y-4">
+                <a 
+                  href="#how-it-works" 
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  How It Works
+                </a>
+                <a 
+                  href="#upload" 
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Analyze Resume
+                </a>
+                {user ? (
+                  <>
+                    <Link 
+                      to={user.role === "admin" ? "/admin" : "/dashboard"}
+                      className="block py-2 text-foreground hover:text-primary transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {user.role === "admin" ? "Admin Panel" : "Dashboard"}
+                    </Link>
+                    <Button variant="outline" className="w-full" onClick={handleLogout}>
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                    <Button className="w-full">Login</Button>
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </header>
+
         {/* Hero Section */}
         <Hero />
         
@@ -88,7 +208,7 @@ const Index = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold tracking-tight mb-4">How It Works</h2>
+            <h2 className="text-3xl font-bold tracking-tight mb-4 gradient-text">How It Works</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Our AI-powered resume analyzer breaks down your resume and provides actionable feedback in just a few simple steps.
             </p>
@@ -102,7 +222,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-card rounded-xl border p-6 text-center flex flex-col items-center"
+                className="bg-card cyber-border rounded-xl p-6 text-center flex flex-col items-center"
               >
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <span className="text-lg font-bold text-primary">{step.id}</span>

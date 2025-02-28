@@ -44,11 +44,11 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
   let bgColorClass;
   
   if (color === "primary") {
-    colorClass = "text-primary";
-    bgColorClass = "bg-primary";
+    colorClass = "text-indigo-600";
+    bgColorClass = "bg-indigo-600";
   } else if (color === "green") {
-    colorClass = "text-green-600";
-    bgColorClass = "bg-green-600";
+    colorClass = "text-emerald-600";
+    bgColorClass = "bg-emerald-600";
   } else if (color === "amber") {
     colorClass = "text-amber-600";
     bgColorClass = "bg-amber-600";
@@ -67,7 +67,7 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
       <div className="mb-4 w-full max-w-[150px]">
         <div className="relative pt-[100%]"> {/* This creates a square aspect ratio */}
           <svg
-            className="absolute inset-0 w-full h-full transform -rotate-90"
+            className="absolute inset-0 w-full h-full transform"
             viewBox="0 0 100 100"
           >
             {/* Background circle */}
@@ -78,23 +78,21 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
               fill="none"
               stroke="currentColor"
               strokeWidth="8"
-              className="text-muted"
+              className="text-slate-200 dark:text-slate-700"
             />
             
-            {/* Progress circle */}
-            <motion.circle
-              cx="50"
-              cy="50"
-              r="45"
+            {/* Progress circle - fixing rotation here */}
+            <motion.path
+              d={`M50,5 A45,45 0 ${score > 50 ? 1 : 0},1 ${
+                50 + 45 * Math.sin((score / 100) * Math.PI * 2)
+              },${50 - 45 * Math.cos((score / 100) * Math.PI * 2)}`}
               fill="none"
               stroke="currentColor"
               strokeWidth="8"
               strokeLinecap="round"
-              strokeDasharray="283" // 2 * PI * r (circumference)
-              strokeDashoffset={283 - (283 * currentScore) / 100}
               className={colorClass}
-              initial={{ strokeDashoffset: 283 }}
-              animate={{ strokeDashoffset: 283 - (283 * currentScore) / 100 }}
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: currentScore / 100 }}
               transition={{ duration: 2, delay, ease: "easeOut" }}
             />
             
@@ -118,7 +116,7 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
       </div>
       
       <motion.div 
-        className="w-full mt-4 h-2 bg-muted rounded-full overflow-hidden"
+        className="w-full mt-4 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: delay + 0.3 }}
