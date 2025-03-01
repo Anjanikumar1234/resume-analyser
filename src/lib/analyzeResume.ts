@@ -20,7 +20,7 @@ const extractJobRoles = (text: string) => {
   const roleCategories = {
     development: [
       'software', 'developer', 'engineer', 'coding', 'programming', 'javascript', 'python', 'java', 
-      'c++', 'react', 'node', 'full stack', 'frontend', 'backend', 'web', 'mobile', 'app', 
+      'c\\+\\+', 'react', 'node', 'full stack', 'frontend', 'backend', 'web', 'mobile', 'app', 
       'development', 'angular', 'vue', 'typescript', 'ruby', 'php', 'golang', 'rust'
     ],
     design: [
@@ -126,7 +126,7 @@ const getJobRecommendationsByCategory = (categories: string[], score: number) =>
       senior: ['Chief Nursing Officer', 'Medical Director', 'Healthcare Executive', 'Clinical Manager']
     },
     education: {
-      entry: ['Teaching Assistant', 'Tutor', 'Teacher's Aide', 'Admissions Counselor'],
+      entry: ['Teaching Assistant', 'Tutor', 'Teacher\'s Aide', 'Admissions Counselor'],
       mid: ['Teacher', 'Instructor', 'Academic Advisor', 'Education Coordinator'],
       senior: ['Principal', 'Department Head', 'Education Director', 'Dean']
     },
