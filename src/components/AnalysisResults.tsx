@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import AnimatedScore from "./AnimatedScore";
 import StrengthsWeaknesses, { Strength, Weakness } from "./StrengthsWeaknesses";
 import Suggestions, { Suggestion } from "./Suggestions";
-import { Download, Share2, Briefcase, ExternalLink } from "lucide-react";
+import { Download, Share2, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -28,7 +28,6 @@ interface JobRecommendation {
   match: number;
   description: string;
   skills: string[];
-  link: string;
 }
 
 const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
@@ -43,24 +42,21 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
           company: "TechGlobal Inc.",
           match: 92,
           description: "Lead development of enterprise applications using React, Node.js, and cloud infrastructure.",
-          skills: ["React", "Node.js", "AWS", "System Architecture"],
-          link: "#"
+          skills: ["React", "Node.js", "AWS", "System Architecture"]
         },
         {
           title: "Technical Lead",
           company: "InnovateSoft",
           match: 88,
           description: "Guide a team of developers in building scalable web applications and mentoring junior developers.",
-          skills: ["Team Leadership", "Full Stack Development", "Agile", "Code Review"],
-          link: "#"
+          skills: ["Team Leadership", "Full Stack Development", "Agile", "Code Review"]
         },
         {
           title: "DevOps Engineer",
           company: "CloudScale",
           match: 85,
           description: "Implement and maintain CI/CD pipelines and infrastructure automation for cloud applications.",
-          skills: ["Docker", "Kubernetes", "AWS", "CI/CD"],
-          link: "#"
+          skills: ["Docker", "Kubernetes", "AWS", "CI/CD"]
         }
       ];
     } else if (overallScore >= 70) {
@@ -70,24 +66,21 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
           company: "WebWorks",
           match: 84,
           description: "Build responsive user interfaces and implement UI/UX designs using modern web technologies.",
-          skills: ["JavaScript", "React", "CSS", "Responsive Design"],
-          link: "#"
+          skills: ["JavaScript", "React", "CSS", "Responsive Design"]
         },
         {
           title: "Backend Developer",
           company: "DataFlow Systems",
           match: 79,
           description: "Develop and maintain RESTful APIs and server-side applications with focus on performance.",
-          skills: ["Node.js", "Express", "SQL", "API Design"],
-          link: "#"
+          skills: ["Node.js", "Express", "SQL", "API Design"]
         },
         {
           title: "QA Engineer",
           company: "QualityFirst",
           match: 76,
           description: "Create and execute test plans, identify bugs, and ensure software quality through automated testing.",
-          skills: ["Test Automation", "Selenium", "Jest", "QA Methodologies"],
-          link: "#"
+          skills: ["Test Automation", "Selenium", "Jest", "QA Methodologies"]
         }
       ];
     } else {
@@ -97,24 +90,21 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
           company: "GrowthTech",
           match: 75,
           description: "Learn and grow while implementing website features under the guidance of senior developers.",
-          skills: ["HTML", "CSS", "JavaScript", "Git"],
-          link: "#"
+          skills: ["HTML", "CSS", "JavaScript", "Git"]
         },
         {
           title: "Technical Support Specialist",
           company: "SupportHub",
           match: 70,
           description: "Provide technical assistance to users, troubleshoot issues, and document solutions.",
-          skills: ["Problem Solving", "Communication", "Technical Documentation", "Customer Service"],
-          link: "#"
+          skills: ["Problem Solving", "Communication", "Technical Documentation", "Customer Service"]
         },
         {
           title: "QA Tester",
           company: "BugBusters",
           match: 68,
           description: "Execute test cases, report bugs, and verify fixes to ensure software quality.",
-          skills: ["Testing", "Bug Reporting", "Attention to Detail", "Software Quality"],
-          link: "#"
+          skills: ["Testing", "Bug Reporting", "Attention to Detail", "Software Quality"]
         }
       ];
     }
@@ -324,13 +314,6 @@ ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}%
                     ))}
                   </div>
                 </div>
-              </div>
-              
-              <div className="border-t p-3">
-                <Button variant="outline" size="sm" className="w-full">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View Job
-                </Button>
               </div>
             </motion.div>
           ))}

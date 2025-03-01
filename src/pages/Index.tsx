@@ -29,6 +29,10 @@ const Index = () => {
   const [analysisResults, setAnalysisResults] = useState<AnalysisData | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  // Store resume text to maintain consistent analysis
+  const [resumeText, setResumeText] = useState<string>("");
+  // Reference for analysis results section
+  const analysisResultsRef = React.useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     // Check if user is logged in
@@ -40,12 +44,13 @@ const Index = () => {
   
   const handleResumeUpload = async (text: string) => {
     try {
+      setResumeText(text); // Store the resume text
       setIsAnalyzing(true);
       setCurrentStep(2);
       
       // Scroll to the progress indicator
       window.scrollTo({
-        top: document.documentElement.scrollHeight,
+        top: document.documentElement.scrollHeight / 2, // Scroll to middle instead of bottom
         behavior: "smooth"
       });
       
@@ -58,6 +63,14 @@ const Index = () => {
       // Update state with results
       setAnalysisResults(results);
       setCurrentStep(4);
+      
+      // Scroll to analysis results after they're rendered
+      setTimeout(() => {
+        if (analysisResultsRef.current) {
+          analysisResultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+      
       toast.success("Analysis complete! Review your results below.");
     } catch (error) {
       console.error("Analysis error:", error);
@@ -207,7 +220,9 @@ const Index = () => {
         
         {/* Analysis Results (only show when available) */}
         {analysisResults && currentStep === 4 && (
-          <AnalysisResults data={analysisResults} />
+          <div ref={analysisResultsRef}>
+            <AnalysisResults data={analysisResults} />
+          </div>
         )}
         
         {/* How It Works Section */}
