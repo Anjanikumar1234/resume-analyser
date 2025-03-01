@@ -48,11 +48,10 @@ const Index = () => {
       setIsAnalyzing(true);
       setCurrentStep(2);
       
-      // Scroll to the progress indicator
-      window.scrollTo({
-        top: document.documentElement.scrollHeight / 2, // Scroll to middle instead of bottom
-        behavior: "smooth"
-      });
+      // Scroll to the progress indicator instead of the bottom
+      if (analysisResultsRef.current) {
+        analysisResultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
       
       // Simulate step progression
       setTimeout(() => setCurrentStep(3), 1500);
@@ -64,7 +63,7 @@ const Index = () => {
       setAnalysisResults(results);
       setCurrentStep(4);
       
-      // Scroll to analysis results after they're rendered
+      // Only scroll to the analysis results after they're rendered
       setTimeout(() => {
         if (analysisResultsRef.current) {
           analysisResultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -205,7 +204,9 @@ const Index = () => {
         <Hero />
         
         {/* Resume Upload Section */}
-        <ResumeUpload onUpload={handleResumeUpload} />
+        <div ref={analysisResultsRef}>
+          <ResumeUpload onUpload={handleResumeUpload} />
+        </div>
         
         {/* Progress Indicator (only show during analysis) */}
         {isAnalyzing && (
@@ -220,9 +221,7 @@ const Index = () => {
         
         {/* Analysis Results (only show when available) */}
         {analysisResults && currentStep === 4 && (
-          <div ref={analysisResultsRef}>
-            <AnalysisResults data={analysisResults} />
-          </div>
+          <AnalysisResults data={analysisResults} />
         )}
         
         {/* How It Works Section */}

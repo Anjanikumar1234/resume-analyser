@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import AnimatedScore from "./AnimatedScore";
 import StrengthsWeaknesses, { Strength, Weakness } from "./StrengthsWeaknesses";
 import Suggestions, { Suggestion } from "./Suggestions";
-import { Download, Share2, Briefcase } from "lucide-react";
+import { Download, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -147,22 +147,6 @@ ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}%
     URL.revokeObjectURL(url);
     
     toast.success("Analysis results downloaded successfully!");
-  };
-  
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "My Resume Analysis Results",
-          text: `Check out my resume analysis! Overall score: ${data.overallScore}/100`,
-        });
-        toast.success("Shared successfully!");
-      } catch (error) {
-        toast.error("Error sharing results");
-      }
-    } else {
-      toast.error("Share functionality not supported by your browser");
-    }
   };
   
   return (
@@ -329,11 +313,6 @@ ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}%
         <Button onClick={handleDownload} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700">
           <Download className="w-4 h-4" />
           Download Results
-        </Button>
-        
-        <Button variant="outline" onClick={handleShare} className="flex items-center gap-2 border-indigo-300 hover:bg-indigo-50 dark:border-indigo-800 dark:hover:bg-indigo-950/20">
-          <Share2 className="w-4 h-4" />
-          Share Results
         </Button>
       </motion.div>
     </motion.div>
