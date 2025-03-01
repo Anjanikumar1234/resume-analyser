@@ -28,23 +28,29 @@ export const analyzeResume = async (text: string): Promise<AnalysisData> => {
   // In a real app, this would use the OpenAI API
   // openai.chat.completions.create({...})
   
-  // For demo purposes, we'll simulate an analysis with some dummy data
-  // This ensures the app works without needing an actual OpenAI API key
+  // For demo purposes, we'll generate deterministic results based on the text content
+  // This ensures the same resume text always gets the same scores
   
   // Simulate a processing delay to make it feel more realistic
   await new Promise(resolve => setTimeout(resolve, 1500));
   
-  // Calculate some mock scores
-  const getRandomScore = (min: number, max: number) => 
-    Math.floor(Math.random() * (max - min + 1)) + min;
+  // Calculate deterministic scores based on text content
+  const getScoreFromText = (text: string, base: number): number => {
+    // Use string length combined with character code sums to create a deterministic but varied score
+    const textHash = text.split('').reduce((sum, char, index) => 
+      sum + char.charCodeAt(0) * (index % 5 + 1), 0);
+    
+    // Normalize to a score between base and base+30
+    return Math.min(100, Math.max(40, base + (textHash % 30)));
+  };
   
-  const overallScore = getRandomScore(65, 95);
-  const readabilityScore = getRandomScore(60, 95);
-  const relevanceScore = getRandomScore(55, 90);
-  const keywordsScore = getRandomScore(50, 95);
+  // Generate fixed scores based on resume content to ensure consistency
+  const overallScore = getScoreFromText(text, 70);
+  const readabilityScore = getScoreFromText(text, 65);
+  const relevanceScore = getScoreFromText(text, 60);
+  const keywordsScore = getScoreFromText(text, 55);
   
   // Create sample data based on text length and common resume elements
-  const textLength = text.length;
   const hasQuantifiableResults = text.match(/increased|improved|reduced|achieved|delivered|managed|led|created/gi);
   const hasEducation = text.match(/degree|university|college|bachelor|master|phd|diploma|graduate/gi);
   const hasSkills = text.match(/proficient|skill|experienced|expertise|knowledge|familiar|advanced|certified/gi);
@@ -57,14 +63,14 @@ export const analyzeResume = async (text: string): Promise<AnalysisData> => {
       "Relevant skills highlighted",
       hasQuantifiableResults ? "Quantifiable achievements" : "Experience properly detailed",
       hasEducation ? "Strong educational background" : "Professional focus",
-      textLength > 1500 ? "Comprehensive experience detailing" : "Concise presentation"
+      text.length > 1500 ? "Comprehensive experience detailing" : "Concise presentation"
     ],
     weaknesses: [
-      textLength < 800 ? "Resume appears too short" : "Some sections could be more concise",
+      text.length < 800 ? "Resume appears too short" : "Some sections could be more concise",
       hasSkills ? "Skills section could be more specific" : "Technical skills not clearly highlighted",
       "Limited use of industry keywords",
       hasQuantifiableResults ? "More quantifiable achievements needed" : "Achievements not quantified",
-      textLength > 2500 ? "Resume is too verbose" : "Could include more details"
+      text.length > 2500 ? "Resume is too verbose" : "Could include more details"
     ],
     suggestions: [
       "Add more measurable achievements",

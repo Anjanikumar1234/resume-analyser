@@ -33,7 +33,6 @@ const Index = () => {
   const [resumeText, setResumeText] = useState<string>("");
   
   // References for scrolling
-  const getStartedRef = useRef<HTMLDivElement>(null);
   const uploadRef = useRef<HTMLDivElement>(null);
   const analysisRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -113,9 +112,6 @@ const Index = () => {
               
               {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center space-x-6">
-                <a href="#get-started" className="text-foreground hover:text-primary transition-colors">
-                  Get Started
-                </a>
                 <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
                   How It Works
                 </a>
@@ -170,13 +166,6 @@ const Index = () => {
             >
               <div className="container mx-auto px-4 py-4 space-y-4">
                 <a 
-                  href="#get-started" 
-                  className="block py-2 text-foreground hover:text-primary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Get Started
-                </a>
-                <a 
                   href="#how-it-works" 
                   className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
@@ -223,97 +212,7 @@ const Index = () => {
         {/* Hero Section */}
         <Hero />
 
-        {/* Get Started Section */}
-        <section id="get-started" ref={getStartedRef} className="container max-w-5xl mx-auto py-16 px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl font-bold tracking-tight mb-4 gradient-text">Get Started</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Discover how our AI-powered resume analyzer can transform your job search and career opportunities in three simple steps.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="bg-card cyber-border rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
-            >
-              <div className="p-6 text-center flex flex-col items-center h-full">
-                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-                  <FileText className="w-8 h-8 text-indigo-500" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">1. Upload Resume</h3>
-                <p className="text-muted-foreground mb-6">
-                  Upload your resume document or paste your resume text to begin the analysis process.
-                </p>
-                <div className="mt-auto">
-                  <Button onClick={scrollToUpload} className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600">
-                    Upload Now
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-card cyber-border rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
-            >
-              <div className="p-6 text-center flex flex-col items-center h-full">
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                  <BarChart className="w-8 h-8 text-purple-500" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">2. Review Analysis</h3>
-                <p className="text-muted-foreground mb-6">
-                  Get detailed scores, strengths, weaknesses, and personalized suggestions to improve your resume.
-                </p>
-                <div className="mt-auto">
-                  <Button onClick={scrollToUpload} className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                    Start Analysis
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="bg-card cyber-border rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
-            >
-              <div className="p-6 text-center flex flex-col items-center h-full">
-                <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-4">
-                  <User className="w-8 h-8 text-pink-500" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">3. Land Your Job</h3>
-                <p className="text-muted-foreground mb-6">
-                  Apply the recommendations to create a standout resume that impresses employers and lands interviews.
-                </p>
-                <div className="mt-auto">
-                  <Button onClick={scrollToUpload} className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-indigo-500 hover:from-pink-600 hover:to-indigo-600">
-                    Get Started
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-        
-        {/* Resume Upload Section */}
+        {/* Resume Upload Section - Moved higher in the page */}
         <div id="upload" ref={uploadRef}>
           <ResumeUpload onUpload={handleResumeUpload} />
         </div>
