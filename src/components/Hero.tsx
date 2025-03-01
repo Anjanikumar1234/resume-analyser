@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { motion, useAnimation } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 const Hero: React.FC = () => {
   const controls = useAnimation();
@@ -18,7 +19,7 @@ const Hero: React.FC = () => {
   }, [controls]);
   
   return (
-    <section className="relative flex items-center justify-center min-h-[70vh] px-4 py-20 overflow-hidden">
+    <section className="relative flex items-center justify-center min-h-[80vh] px-4 py-20 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background opacity-50 z-0"></div>
       
       <div className="container relative z-10 max-w-5xl mx-auto">
@@ -32,10 +33,10 @@ const Hero: React.FC = () => {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-4"
+            className="mb-4 flex justify-center"
           >
-            <span className="inline-block px-3 py-1 text-xs font-medium tracking-wider text-primary bg-primary/10 rounded-full">
-              AI-POWERED
+            <span className="inline-block px-5 py-2 text-sm font-medium tracking-wider text-primary bg-primary/10 rounded-full border border-primary/20 shadow-sm">
+              AI-POWERED RESUME ANALYZER
             </span>
           </motion.div>
           
@@ -45,11 +46,11 @@ const Hero: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <span className="block">Transform Your Resume With</span>
-            <span className="relative inline-block mt-2">
+            <span className="block mb-2">Transform Your Resume With</span>
+            <span className="relative inline-block gradient-text">
               Advanced AI Analysis
               <motion.span 
-                className="absolute bottom-0 left-0 w-full h-1 bg-primary"
+                className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
                 initial={{ scaleX: 0, originX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 1, delay: 1.2 }}
@@ -58,12 +59,13 @@ const Hero: React.FC = () => {
           </motion.h1>
           
           <motion.p 
-            className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-muted-foreground"
+            className="text-lg md:text-xl mb-10 max-w-3xl mx-auto text-muted-foreground"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            Unlock your career potential with our AI resume analyzer. Get detailed insights, personalized recommendations, and stand out to employers.
+            Unlock your career potential with our sophisticated AI resume analyzer. Get detailed insights, 
+            personalized recommendations, and stand out to employers with a resume that showcases your true value.
           </motion.p>
           
           <motion.div
@@ -73,24 +75,43 @@ const Hero: React.FC = () => {
             className="flex flex-col sm:flex-row justify-center items-center gap-4"
           >
             <motion.a
-              href="#upload"
+              href="#get-started"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-primary text-primary-foreground rounded-md font-medium transition-all shadow-md hover:shadow-lg"
+              className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-md font-medium transition-all shadow-md hover:shadow-lg flex items-center gap-2"
             >
-              Analyze My Resume
+              Get Started <ArrowRight className="w-4 h-4" />
             </motion.a>
             
             <motion.a
-              href="#how-it-works"
+              href="#upload"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-transparent border border-primary text-primary rounded-md font-medium transition-all"
+              className="px-8 py-3 bg-transparent border border-primary text-primary rounded-md font-medium transition-all hover:bg-primary/5"
             >
-              How It Works
+              Analyze My Resume
             </motion.a>
           </motion.div>
         </motion.div>
+      </div>
+      
+      {/* Classical decorative elements */}
+      <div className="absolute top-1/2 left-4 md:left-10 transform -translate-y-1/2 hidden md:block">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 0.3, x: 0 }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="h-60 w-px bg-gradient-to-b from-transparent via-primary to-transparent"
+        ></motion.div>
+      </div>
+      
+      <div className="absolute top-1/2 right-4 md:right-10 transform -translate-y-1/2 hidden md:block">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 0.3, x: 0 }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="h-60 w-px bg-gradient-to-b from-transparent via-primary to-transparent"
+        ></motion.div>
       </div>
       
       <div className="absolute bottom-0 left-0 w-full overflow-hidden">

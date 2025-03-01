@@ -97,7 +97,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
   };
   
   return (
-    <section id="upload" className="container max-w-4xl mx-auto py-16 px-4">
+    <section className="container max-w-4xl mx-auto py-16 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -116,7 +116,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="bg-card cyber-border rounded-xl shadow-lg overflow-hidden"
+        className="bg-card cyber-border rounded-xl shadow-lg overflow-hidden backdrop-blur-sm bg-white/50 dark:bg-gray-900/50"
       >
         <div className="p-6 md:p-8">
           {!fileUploaded ? (
@@ -146,7 +146,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
                   >
                     <Upload className="w-4 h-4" />
                     Browse File
@@ -163,7 +163,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
                   <Button 
                     variant="outline" 
                     onClick={handlePaste}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 border-indigo-300 hover:bg-indigo-50 dark:border-indigo-800 dark:hover:bg-indigo-950/20"
                   >
                     <Clipboard className="w-4 h-4" />
                     Paste Text
@@ -209,7 +209,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
             <Button 
               onClick={handleSubmit}
               disabled={!fileUploaded}
-              className="w-full sm:w-auto min-w-[200px]"
+              className="w-full sm:w-auto min-w-[200px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
             >
               Analyze Resume
             </Button>

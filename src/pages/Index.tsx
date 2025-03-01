@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Hero from "@/components/Hero";
@@ -11,7 +11,7 @@ import ContactSection from "@/components/ContactSection";
 import { analyzeResume } from "@/lib/analyzeResume";
 import { AnalysisData } from "@/components/AnalysisResults";
 import { toast } from "sonner";
-import { Menu, X, User, LogIn } from "lucide-react";
+import { Menu, X, User, LogIn, ArrowRight, FileText, BarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Analysis steps
@@ -31,8 +31,12 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   // Store resume text to maintain consistent analysis
   const [resumeText, setResumeText] = useState<string>("");
-  // Reference for analysis results section
-  const analysisResultsRef = React.useRef<HTMLDivElement>(null);
+  
+  // References for scrolling
+  const getStartedRef = useRef<HTMLDivElement>(null);
+  const uploadRef = useRef<HTMLDivElement>(null);
+  const analysisRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     // Check if user is logged in
@@ -48,9 +52,9 @@ const Index = () => {
       setIsAnalyzing(true);
       setCurrentStep(2);
       
-      // Scroll to the progress indicator instead of the bottom
-      if (analysisResultsRef.current) {
-        analysisResultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Scroll to progress indicator
+      if (progressRef.current) {
+        progressRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       }
       
       // Simulate step progression
@@ -65,8 +69,8 @@ const Index = () => {
       
       // Only scroll to the analysis results after they're rendered
       setTimeout(() => {
-        if (analysisResultsRef.current) {
-          analysisResultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (analysisRef.current) {
+          analysisRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }, 100);
       
@@ -85,6 +89,12 @@ const Index = () => {
     toast.success("Logged out successfully");
     setIsMenuOpen(false);
   };
+
+  const scrollToUpload = () => {
+    if (uploadRef.current) {
+      uploadRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
   
   return (
     <div className="min-h-screen relative">
@@ -92,7 +102,7 @@ const Index = () => {
       
       <div className="relative z-10">
         {/* Navigation Bar */}
-        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b">
+        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-indigo-100 dark:border-indigo-900">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
@@ -103,6 +113,9 @@ const Index = () => {
               
               {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center space-x-6">
+                <a href="#get-started" className="text-foreground hover:text-primary transition-colors">
+                  Get Started
+                </a>
                 <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
                   How It Works
                 </a>
@@ -157,6 +170,13 @@ const Index = () => {
             >
               <div className="container mx-auto px-4 py-4 space-y-4">
                 <a 
+                  href="#get-started" 
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Get Started
+                </a>
+                <a 
                   href="#how-it-works" 
                   className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
@@ -202,9 +222,99 @@ const Index = () => {
 
         {/* Hero Section */}
         <Hero />
+
+        {/* Get Started Section */}
+        <section id="get-started" ref={getStartedRef} className="container max-w-5xl mx-auto py-16 px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold tracking-tight mb-4 gradient-text">Get Started</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Discover how our AI-powered resume analyzer can transform your job search and career opportunities in three simple steps.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="bg-card cyber-border rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
+            >
+              <div className="p-6 text-center flex flex-col items-center h-full">
+                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-8 h-8 text-indigo-500" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">1. Upload Resume</h3>
+                <p className="text-muted-foreground mb-6">
+                  Upload your resume document or paste your resume text to begin the analysis process.
+                </p>
+                <div className="mt-auto">
+                  <Button onClick={scrollToUpload} className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600">
+                    Upload Now
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-card cyber-border rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
+            >
+              <div className="p-6 text-center flex flex-col items-center h-full">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                  <BarChart className="w-8 h-8 text-purple-500" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">2. Review Analysis</h3>
+                <p className="text-muted-foreground mb-6">
+                  Get detailed scores, strengths, weaknesses, and personalized suggestions to improve your resume.
+                </p>
+                <div className="mt-auto">
+                  <Button onClick={scrollToUpload} className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                    Start Analysis
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-card cyber-border rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
+            >
+              <div className="p-6 text-center flex flex-col items-center h-full">
+                <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-4">
+                  <User className="w-8 h-8 text-pink-500" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">3. Land Your Job</h3>
+                <p className="text-muted-foreground mb-6">
+                  Apply the recommendations to create a standout resume that impresses employers and lands interviews.
+                </p>
+                <div className="mt-auto">
+                  <Button onClick={scrollToUpload} className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-indigo-500 hover:from-pink-600 hover:to-indigo-600">
+                    Get Started
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
         
         {/* Resume Upload Section */}
-        <div ref={analysisResultsRef}>
+        <div id="upload" ref={uploadRef}>
           <ResumeUpload onUpload={handleResumeUpload} />
         </div>
         
@@ -214,6 +324,7 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="container max-w-3xl mx-auto px-4"
+            ref={progressRef}
           >
             <ProgressIndicator currentStep={currentStep} steps={steps} />
           </motion.div>
@@ -221,7 +332,9 @@ const Index = () => {
         
         {/* Analysis Results (only show when available) */}
         {analysisResults && currentStep === 4 && (
-          <AnalysisResults data={analysisResults} />
+          <div ref={analysisRef}>
+            <AnalysisResults data={analysisResults} />
+          </div>
         )}
         
         {/* How It Works Section */}
