@@ -202,9 +202,10 @@ export const analyzeResume = async (resumeText: string): Promise<AnalysisData> =
       suggestion: `Consider improving this area to enhance your overall resume effectiveness.`
     }));
 
-    // Transform suggestions to expected format
+    // Transform suggestions to expected format with proper typing
     const formattedSuggestions = data.suggestions.map((suggestion, index) => {
-      const priority = index === 0 ? "high" : index === 1 ? "medium" : "low";
+      // Explicitly type the priority as one of the allowed values
+      const priority: "high" | "medium" | "low" = index === 0 ? "high" : index === 1 ? "medium" : "low";
       return {
         id: `suggestion-${index + 1}`,
         title: suggestion,
