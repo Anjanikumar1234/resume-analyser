@@ -1,4 +1,3 @@
-
 import { Strength, Weakness } from "../components/StrengthsWeaknesses";
 import { Suggestion } from "../components/Suggestions";
 import { AnalysisData } from "../components/AnalysisResults";
@@ -126,7 +125,7 @@ const getJobRecommendationsByCategory = (categories: string[], score: number) =>
       senior: ['Chief Nursing Officer', 'Medical Director', 'Healthcare Executive', 'Clinical Manager']
     },
     education: {
-      entry: ['Teaching Assistant', 'Tutor', 'Teacher's Aide', 'Admissions Counselor'],
+      entry: ['Teaching Assistant', 'Tutor', 'Teacher\'s Aide', 'Admissions Counselor'],
       mid: ['Teacher', 'Instructor', 'Academic Advisor', 'Education Coordinator'],
       senior: ['Principal', 'Department Head', 'Education Director', 'Dean']
     },
