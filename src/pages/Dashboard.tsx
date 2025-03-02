@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FileText, User, LogOut, PlusCircle, Clock, CheckCircle } from "lucide-react";
+import { FileText, User, LogOut, PlusCircle, Clock, CheckCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import AnimatedBackground from "@/components/AnimatedBackground";
@@ -13,6 +13,11 @@ interface Resume {
   date: string;
   status: "analyzed" | "pending";
   overallScore: number;
+}
+
+interface JobSkill {
+  name: string;
+  level: "beginner" | "intermediate" | "advanced";
 }
 
 const Dashboard = () => {
@@ -72,13 +77,98 @@ const Dashboard = () => {
     navigate(`/resume/${id}`);
   };
   
+  const handleDeleteResume = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the parent onClick
+    
+    // Filter out the resume with the given id
+    const updatedResumes = resumes.filter(resume => resume.id !== id);
+    setResumes(updatedResumes);
+    
+    toast.success("Resume deleted successfully");
+  };
+  
   const getRecommendedJobs = (score: number) => {
     if (score >= 80) {
-      return ["Senior Software Engineer", "Technical Lead", "Full Stack Developer"];
+      return [
+        {
+          title: "Senior Software Engineer",
+          skills: [
+            { name: "React/Angular", level: "advanced" },
+            { name: "Node.js", level: "advanced" },
+            { name: "Cloud Architecture", level: "intermediate" }
+          ]
+        },
+        {
+          title: "Technical Lead",
+          skills: [
+            { name: "Team Management", level: "advanced" },
+            { name: "System Design", level: "advanced" },
+            { name: "Code Review", level: "intermediate" }
+          ]
+        },
+        {
+          title: "Full Stack Developer",
+          skills: [
+            { name: "Frontend Frameworks", level: "advanced" },
+            { name: "Backend Development", level: "intermediate" },
+            { name: "Database Design", level: "intermediate" }
+          ]
+        }
+      ];
     } else if (score >= 70) {
-      return ["Software Developer", "Front-end Developer", "Back-end Developer"];
+      return [
+        {
+          title: "Software Developer",
+          skills: [
+            { name: "JavaScript", level: "intermediate" },
+            { name: "HTML/CSS", level: "intermediate" },
+            { name: "Git", level: "beginner" }
+          ]
+        },
+        {
+          title: "Front-end Developer",
+          skills: [
+            { name: "React", level: "intermediate" },
+            { name: "CSS/SASS", level: "intermediate" },
+            { name: "Responsive Design", level: "beginner" }
+          ]
+        },
+        {
+          title: "Back-end Developer",
+          skills: [
+            { name: "Node.js", level: "intermediate" },
+            { name: "SQL", level: "intermediate" },
+            { name: "API Design", level: "beginner" }
+          ]
+        }
+      ];
     } else {
-      return ["Junior Developer", "Intern", "Technical Support"];
+      return [
+        {
+          title: "Junior Developer",
+          skills: [
+            { name: "Basic Programming", level: "beginner" },
+            { name: "HTML/CSS", level: "beginner" },
+            { name: "Version Control", level: "beginner" }
+          ]
+        },
+        {
+          title: "Intern",
+          skills: [
+            { name: "Programming Basics", level: "beginner" },
+            { name: "Communication", level: "beginner" },
+            { name: "Problem Solving", level: "beginner" }
+          ]
+        },
+        {
+          title: "Technical Support",
+          skills: [
+            { name: "Customer Service", level: "beginner" },
+            { name: "Basic Troubleshooting", level: "beginner" },
+            { name: "Documentation", level: "beginner" }
+          ]
+        }
+      ];
     }
   };
   
@@ -189,11 +279,21 @@ const Dashboard = () => {
                           </div>
                         </div>
                         
-                        {resume.status === "analyzed" && (
-                          <div className="bg-card px-3 py-1 rounded-full border">
-                            <span className="text-sm font-medium">Score: {resume.overallScore}</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-3">
+                          {resume.status === "analyzed" && (
+                            <div className="bg-card px-3 py-1 rounded-full border">
+                              <span className="text-sm font-medium">Score: {resume.overallScore}</span>
+                            </div>
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={(e) => handleDeleteResume(resume.id, e)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
@@ -223,13 +323,27 @@ const Dashboard = () => {
                             <p className="text-sm text-muted-foreground mb-4">
                               With a score of {resume.overallScore}, you might be a good fit for:
                             </p>
-                            <ul className="space-y-2">
+                            <ul className="space-y-3">
                               {getRecommendedJobs(resume.overallScore).map((job, idx) => (
-                                <li key={idx} className="bg-background p-2 rounded border flex justify-between items-center">
-                                  <span>{job}</span>
-                                  <Button size="sm" variant="ghost" className="h-7">
-                                    View Openings
-                                  </Button>
+                                <li key={idx} className="bg-background p-3 rounded border">
+                                  <div className="font-medium mb-2">{job.title}</div>
+                                  <div className="text-sm text-muted-foreground mb-2">Required Skills:</div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {job.skills.map((skill, sidx) => (
+                                      <span 
+                                        key={sidx} 
+                                        className={`text-xs px-2 py-1 rounded-full ${
+                                          skill.level === 'advanced' 
+                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                            : skill.level === 'intermediate'
+                                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                              : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                                        }`}
+                                      >
+                                        {skill.name}
+                                      </span>
+                                    ))}
+                                  </div>
                                 </li>
                               ))}
                             </ul>
@@ -275,3 +389,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
