@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Upload, Clipboard, Check, X } from "lucide-react";
@@ -57,23 +56,6 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
       handleFile(files[0]);
     }
   };
-
-  // Check if content appears to be a resume
-  const isResumeContent = (text: string): boolean => {
-    const resumeKeywords = [
-      'resume', 'cv', 'curriculum vitae', 'experience', 'skills', 'education',
-      'work history', 'employment', 'job', 'qualification', 'certification',
-      'reference', 'objective', 'summary', 'professional', 'career'
-    ];
-    
-    const lowercaseText = text.toLowerCase();
-    // Check if at least 3 resume keywords are present
-    const keywordsFound = resumeKeywords.filter(keyword => 
-      lowercaseText.includes(keyword)
-    );
-    
-    return keywordsFound.length >= 3;
-  };
   
   const handleFile = (file: File) => {
     if (!file.name.endsWith('.txt') && !file.name.endsWith('.pdf') && !file.name.endsWith('.docx')) {
@@ -86,19 +68,9 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
-      
-      // Check if content appears to be a resume
-      if (!isResumeContent(result)) {
-        toast.error("The uploaded file doesn't appear to be a resume or CV. Please upload a valid resume document.");
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-        return;
-      }
-      
       setResumeText(result);
       setFileUploaded(true);
-      toast.success("Resume detected and uploaded successfully!");
+      toast.success("Resume uploaded successfully!");
     };
     reader.readAsText(file);
   };
@@ -112,16 +84,10 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
     try {
       const text = await navigator.clipboard.readText();
       if (text) {
-        // Check if pasted content appears to be a resume
-        if (!isResumeContent(text)) {
-          toast.error("The pasted text doesn't appear to be a resume or CV. Please paste valid resume content.");
-          return;
-        }
-        
         setResumeText(text);
         setFileName("Pasted text");
         setFileUploaded(true);
-        toast.success("Resume detected and pasted successfully!");
+        toast.success("Text pasted successfully!");
       } else {
         toast.error("No text found in clipboard");
       }
