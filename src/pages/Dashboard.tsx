@@ -36,31 +36,37 @@ const Dashboard = () => {
     setUser(JSON.parse(storedUser));
     
     // Mock data for resumes
-    const mockResumes: Resume[] = [
-      {
-        id: "1",
-        name: "Software Developer Resume",
-        date: "2023-05-15",
-        status: "analyzed",
-        overallScore: 78
-      },
-      {
-        id: "2",
-        name: "Product Manager Resume",
-        date: "2023-06-20",
-        status: "analyzed",
-        overallScore: 82
-      },
-      {
-        id: "3",
-        name: "Data Scientist Resume",
-        date: "2023-07-10",
-        status: "pending",
-        overallScore: 0
-      }
-    ];
-    
-    setResumes(mockResumes);
+    const storedResumes = localStorage.getItem("resumes");
+    if (storedResumes) {
+      setResumes(JSON.parse(storedResumes));
+    } else {
+      const mockResumes: Resume[] = [
+        {
+          id: "1",
+          name: "Software Developer Resume",
+          date: "2023-05-15",
+          status: "analyzed",
+          overallScore: 78
+        },
+        {
+          id: "2",
+          name: "Product Manager Resume",
+          date: "2023-06-20",
+          status: "analyzed",
+          overallScore: 82
+        },
+        {
+          id: "3",
+          name: "Data Scientist Resume",
+          date: "2023-07-10",
+          status: "pending",
+          overallScore: 0
+        }
+      ];
+      
+      setResumes(mockResumes);
+      localStorage.setItem("resumes", JSON.stringify(mockResumes));
+    }
   }, [navigate]);
   
   const handleLogout = () => {
@@ -83,6 +89,9 @@ const Dashboard = () => {
     // Filter out the resume with the given id
     const updatedResumes = resumes.filter(resume => resume.id !== id);
     setResumes(updatedResumes);
+    
+    // Update localStorage to persist the deletion
+    localStorage.setItem("resumes", JSON.stringify(updatedResumes));
     
     toast.success("Resume deleted successfully");
   };
@@ -389,4 +398,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
