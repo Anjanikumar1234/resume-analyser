@@ -7,9 +7,11 @@ import { toast } from "sonner";
 
 interface ResumeUploadProps {
   onUpload: (text: string) => void;
+  onAuthNeeded: () => void;
+  isLoggedIn: boolean;
 }
 
-const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
+const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isLoggedIn }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState("");
@@ -30,6 +32,11 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
     e.preventDefault();
     setIsDragging(false);
     
+    if (!isLoggedIn) {
+      onAuthNeeded();
+      return;
+    }
+    
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       handleFile(files[0]);
@@ -37,10 +44,35 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
   };
   
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isLoggedIn) {
+      onAuthNeeded();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+    
     const files = e.target.files;
     if (files && files.length > 0) {
       handleFile(files[0]);
     }
+  };
+
+  // Check if content appears to be a resume
+  const isResumeContent = (text: string): boolean => {
+    const resumeKeywords = [
+      'resume', 'cv', 'curriculum vitae', 'experience', 'skills', 'education',
+      'work history', 'employment', 'job', 'qualification', 'certification',
+      'reference', 'objective', 'summary', 'professional', 'career'
+    ];
+    
+    const lowercaseText = text.toLowerCase();
+    // Check if at least 3 resume keywords are present
+    const keywordsFound = resumeKeywords.filter(keyword => 
+      lowercaseText.includes(keyword)
+    );
+    
+    return keywordsFound.length >= 3;
   };
   
   const handleFile = (file: File) => {
@@ -50,26 +82,46 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
     }
     
     setFileName(file.name);
-    setFileUploaded(true);
     
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
+      
+      // Check if content appears to be a resume
+      if (!isResumeContent(result)) {
+        toast.error("The uploaded file doesn't appear to be a resume or CV. Please upload a valid resume document.");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+      
       setResumeText(result);
+      setFileUploaded(true);
+      toast.success("Resume detected and uploaded successfully!");
     };
     reader.readAsText(file);
-    
-    toast.success("File uploaded successfully!");
   };
   
   const handlePaste = async () => {
+    if (!isLoggedIn) {
+      onAuthNeeded();
+      return;
+    }
+    
     try {
       const text = await navigator.clipboard.readText();
       if (text) {
+        // Check if pasted content appears to be a resume
+        if (!isResumeContent(text)) {
+          toast.error("The pasted text doesn't appear to be a resume or CV. Please paste valid resume content.");
+          return;
+        }
+        
         setResumeText(text);
         setFileName("Pasted text");
         setFileUploaded(true);
-        toast.success("Text pasted successfully!");
+        toast.success("Resume detected and pasted successfully!");
       } else {
         toast.error("No text found in clipboard");
       }
@@ -145,7 +197,13 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
                 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button 
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => {
+                      if (!isLoggedIn) {
+                        onAuthNeeded();
+                      } else {
+                        fileInputRef.current?.click();
+                      }
+                    }}
                     className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
                   >
                     <Upload className="w-4 h-4" />
@@ -184,7 +242,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload }) => {
                     <Check className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-lg">File Uploaded Successfully</h3>
+                    <h3 className="font-medium text-lg">Resume Uploaded Successfully</h3>
                     <p className="text-sm text-muted-foreground">{fileName}</p>
                   </div>
                 </div>

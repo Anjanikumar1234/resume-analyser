@@ -31,6 +31,8 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   // Store resume text to maintain consistent analysis
   const [resumeText, setResumeText] = useState<string>("");
+  // Track if user needs authentication
+  const [needsAuth, setNeedsAuth] = useState(false);
   
   // References for scrolling
   const uploadRef = useRef<HTMLDivElement>(null);
@@ -94,6 +96,14 @@ const Index = () => {
       uploadRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  const handleContinueAsGuest = () => {
+    const guestUser = { email: "guest@example.com", role: "guest", name: "Guest User" };
+    localStorage.setItem("user", JSON.stringify(guestUser));
+    setUser(guestUser);
+    setNeedsAuth(false);
+    toast.success("Continuing as guest");
+  };
   
   return (
     <div className="min-h-screen relative">
@@ -106,7 +116,7 @@ const Index = () => {
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
                 <Link to="/" className="text-xl font-bold gradient-text">
-                  ResumeAI
+                  AK Resume Analyser
                 </Link>
               </div>
               
@@ -214,8 +224,48 @@ const Index = () => {
 
         {/* Resume Upload Section - Moved higher in the page */}
         <div id="upload" ref={uploadRef}>
-          <ResumeUpload onUpload={handleResumeUpload} />
+          <ResumeUpload 
+            onUpload={handleResumeUpload} 
+            onAuthNeeded={() => setNeedsAuth(true)}
+            isLoggedIn={!!user}
+          />
         </div>
+        
+        {/* Authentication Dialog */}
+        {needsAuth && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          >
+            <div className="bg-card p-6 rounded-xl shadow-lg max-w-md w-full">
+              <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+              <p className="mb-6">Please log in to analyze your resume or continue as a guest.</p>
+              <div className="flex flex-col gap-3">
+                <Link to="/login">
+                  <Button className="w-full">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Log In
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  onClick={handleContinueAsGuest}
+                  className="w-full"
+                >
+                  Continue as Guest
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setNeedsAuth(false)}
+                  className="w-full"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
         
         {/* Progress Indicator (only show during analysis) */}
         {isAnalyzing && (
@@ -278,7 +328,7 @@ const Index = () => {
         <footer className="bg-card border-t py-8 mt-16">
           <div className="container mx-auto px-4 text-center">
             <p className="text-muted-foreground text-sm">
-              © {new Date().getFullYear()} AI Resume Analyzer. All rights reserved.
+              © {new Date().getFullYear()} AK Resume Analyser. All rights reserved.
             </p>
             <p className="text-muted-foreground text-sm mt-2">
               Developed by Pallapolu Anjani Kumar
