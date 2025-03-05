@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -47,7 +46,7 @@ const Index = () => {
     }
   }, []);
   
-  const handleResumeUpload = async (text: string) => {
+  const handleResumeUpload = async (text: string, industry?: string) => {
     try {
       setResumeText(text); // Store the resume text
       setIsAnalyzing(true);
@@ -61,8 +60,8 @@ const Index = () => {
       // Simulate step progression
       setTimeout(() => setCurrentStep(3), 1500);
       
-      // Analyze the resume
-      const results = await analyzeResume(text);
+      // Analyze the resume with optional industry parameter
+      const results = await analyzeResume(text, industry);
       
       // Update state with results
       setAnalysisResults(results);

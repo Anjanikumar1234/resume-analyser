@@ -7,9 +7,24 @@ export interface AnalysisData {
   readabilityScore: number;
   relevanceScore: number;
   keywordsScore: number;
+  atsCompatibilityScore: number; // New ATS compatibility score
+  industryFitScore: number; // New industry-specific score
   strengths: { id: string; text: string; impact: string }[];
   weaknesses: { id: string; text: string; suggestion: string }[];
   suggestions: { id: string; title: string; description: string; examples: string[]; priority: "high" | "medium" | "low" }[];
+  keywordSuggestions: { category: string; missing: string[]; overused: string[] }[]; // New keyword suggestions
+  industryAnalysis: { // New industry-specific analysis
+    industry: string;
+    relevantSkills: string[];
+    missingSkills: string[];
+    industryTrends: string[];
+  };
+  atsAnalysis: { // New ATS analysis
+    isParseable: boolean;
+    missingKeywords: string[];
+    formatIssues: string[];
+    overallCompatibility: "high" | "medium" | "low";
+  };
 }
 
 // Create a mock OpenAI instance (in a real app, you would use your API key)
@@ -22,8 +37,9 @@ const openai = new OpenAI({
  * Analyzes a resume text and returns detailed analysis data
  * In a real application, this would connect to an AI service
  */
-export const analyzeResume = async (text: string): Promise<AnalysisData> => {
+export const analyzeResume = async (text: string, industry?: string): Promise<AnalysisData> => {
   console.log("Analyzing resume text...", text.substring(0, 100) + "...");
+  console.log("Industry specified:", industry || "None");
   
   // In a real app, this would use the OpenAI API
   // openai.chat.completions.create({...})
@@ -49,11 +65,18 @@ export const analyzeResume = async (text: string): Promise<AnalysisData> => {
   const readabilityScore = getScoreFromText(text, 65);
   const relevanceScore = getScoreFromText(text, 60);
   const keywordsScore = getScoreFromText(text, 55);
+  const atsCompatibilityScore = getScoreFromText(text, 58); // New ATS score
+  
+  // Industry fit score is higher if industry is specified
+  const industryFitScore = industry 
+    ? getScoreFromText(text + industry, 65) 
+    : getScoreFromText(text, 50);
   
   // Create sample data based on text length and common resume elements
   const hasQuantifiableResults = text.match(/increased|improved|reduced|achieved|delivered|managed|led|created/gi);
   const hasEducation = text.match(/degree|university|college|bachelor|master|phd|diploma|graduate/gi);
   const hasSkills = text.match(/proficient|skill|experienced|expertise|knowledge|familiar|advanced|certified/gi);
+  const hasContactInfo = text.match(/email|phone|linkedin|github|portfolio|address/gi);
   
   // Generate some dummy feedback based on content
   const data = {
@@ -80,6 +103,70 @@ export const analyzeResume = async (text: string): Promise<AnalysisData> => {
       "Highlight key skills more prominently",
       hasEducation ? "Place education section strategically" : "Consider adding relevant education or certifications"
     ]
+  };
+  
+  // New keyword suggestions based on different categories
+  const keywordSuggestions = [
+    {
+      category: "Technical Skills",
+      missing: ["Python", "React", "Node.js", "SQL", "AWS"],
+      overused: ["Teamwork", "Communication", "Passionate"]
+    },
+    {
+      category: "Soft Skills",
+      missing: ["Problem Solving", "Critical Thinking", "Time Management"],
+      overused: []
+    },
+    {
+      category: "Industry Terms",
+      missing: ["Agile", "Scrum", "DevOps", "CI/CD"],
+      overused: []
+    }
+  ];
+  
+  // Default industry is "Technology" if none specified
+  const selectedIndustry = industry || "Technology";
+  
+  // Generate industry-specific analysis
+  const industryAnalysis = {
+    industry: selectedIndustry,
+    relevantSkills: [
+      "JavaScript Programming",
+      "React Framework",
+      "API Development",
+      "Cloud Services (AWS/Azure)",
+      "Database Management"
+    ],
+    missingSkills: [
+      "DevOps Experience",
+      "Mobile Development",
+      "UI/UX Design Principles",
+      "Test-Driven Development"
+    ],
+    industryTrends: [
+      "Increasing demand for full-stack developers",
+      "Growing adoption of containerization (Docker, Kubernetes)",
+      "Shift towards serverless architectures",
+      "Emphasis on cybersecurity knowledge"
+    ]
+  };
+  
+  // ATS analysis
+  const atsAnalysis = {
+    isParseable: true,
+    missingKeywords: [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Node.js",
+      "REST API"
+    ],
+    formatIssues: [
+      hasContactInfo ? "" : "Missing or hard-to-parse contact information",
+      "Headers may not be recognized by all ATS systems",
+      "Consider using a simpler format for better ATS readability"
+    ].filter(Boolean),
+    overallCompatibility: atsCompatibilityScore > 75 ? "high" : atsCompatibilityScore > 60 ? "medium" : "low" as "high" | "medium" | "low"
   };
   
   // Ensure we have at least 3-5 of each category
@@ -163,14 +250,25 @@ export const analyzeResume = async (text: string): Promise<AnalysisData> => {
     };
   });
   
+  // Clean up format issues
+  const cleanFormatIssues = atsAnalysis.formatIssues.filter(issue => issue !== "");
+  
   // Return the formatted analysis data
   return {
     overallScore,
     readabilityScore,
     relevanceScore,
     keywordsScore,
+    atsCompatibilityScore,
+    industryFitScore,
     strengths: formattedStrengths,
     weaknesses: formattedWeaknesses,
-    suggestions: formattedSuggestions
+    suggestions: formattedSuggestions,
+    keywordSuggestions,
+    industryAnalysis,
+    atsAnalysis: {
+      ...atsAnalysis,
+      formatIssues: cleanFormatIssues
+    }
   };
 };

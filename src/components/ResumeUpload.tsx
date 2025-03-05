@@ -1,11 +1,15 @@
+
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Upload, Clipboard, Check, X } from "lucide-react";
+import { FileText, Upload, Clipboard, Check, X, BriefcaseIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import IndustrySelect from "./IndustrySelect";
 
 interface ResumeUploadProps {
-  onUpload: (text: string) => void;
+  onUpload: (text: string, industry?: string) => void;
   onAuthNeeded: () => void;
   isLoggedIn: boolean;
 }
@@ -15,6 +19,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileUploaded, setFileUploaded] = useState(false);
+  const [selectedIndustry, setSelectedIndustry] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -111,7 +116,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
       return;
     }
     
-    onUpload(resumeText);
+    onUpload(resumeText, selectedIndustry || undefined);
   };
   
   return (
@@ -223,6 +228,23 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
               </motion.div>
             </AnimatePresence>
           )}
+          
+          {/* Industry Selection */}
+          <div className="mt-6">
+            <div className="space-y-2">
+              <Label htmlFor="industry" className="flex items-center gap-2">
+                <BriefcaseIcon className="w-4 h-4" />
+                Target Industry (Optional)
+              </Label>
+              <IndustrySelect 
+                value={selectedIndustry} 
+                onChange={(value) => setSelectedIndustry(value)} 
+              />
+              <p className="text-xs text-muted-foreground">
+                Select an industry to get more targeted analysis and recommendations
+              </p>
+            </div>
+          </div>
           
           <motion.div 
             initial={{ opacity: 0 }}
