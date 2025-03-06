@@ -35,9 +35,9 @@ const SentenceImprover: React.FC<SentenceImproverProps> = ({
       const improved = await improveSentence(sentence, industry);
       setImprovedSentence(improved);
       
-      // Notify parent component if callback is provided
-      if (onImproved) {
-        onImproved(improved);
+      // Only notify parent component if callback is provided and we're applying the improved sentence
+      if (onImproved && improved) {
+        console.log("Improved sentence ready:", improved);
       }
     } catch (error) {
       console.error("Error improving sentence:", error);
@@ -48,14 +48,20 @@ const SentenceImprover: React.FC<SentenceImproverProps> = ({
   };
 
   const handleApply = () => {
-    setSentence(improvedSentence);
-    setImprovedSentence("");
-    setIsOpen(false);
+    if (!improvedSentence) {
+      toast.error("No improved sentence to apply");
+      return;
+    }
     
+    setSentence(improvedSentence);
+    
+    // Notify parent component with the improved sentence
     if (onImproved) {
       onImproved(improvedSentence);
     }
     
+    setImprovedSentence("");
+    setIsOpen(false);
     toast.success("Improved sentence applied!");
   };
 
