@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -60,8 +61,13 @@ const Index = () => {
       // Simulate step progression
       setTimeout(() => setCurrentStep(3), 1500);
       
+      console.log("Analyzing resume with text length:", text.length);
+      console.log("Industry selected:", industry || "none");
+      
       // Analyze the resume with optional industry parameter
       const results = await analyzeResume(text, industry);
+      
+      console.log("Analysis results received:", results ? "yes" : "no");
       
       // Update state with results
       setAnalysisResults(results);
@@ -78,6 +84,8 @@ const Index = () => {
     } catch (error) {
       console.error("Analysis error:", error);
       toast.error("Something went wrong with the analysis. Please try again.");
+      setIsAnalyzing(false);
+      setCurrentStep(1);
     } finally {
       setIsAnalyzing(false);
     }
