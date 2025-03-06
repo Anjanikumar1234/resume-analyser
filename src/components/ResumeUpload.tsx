@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Upload, Clipboard, Check, X, BriefcaseIcon } from "lucide-react";
@@ -73,7 +72,6 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
     setIsProcessing(true);
     
     try {
-      // For text files, use FileReader
       if (file.name.endsWith('.txt')) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -89,20 +87,14 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
         };
         reader.readAsText(file);
       } 
-      // For PDF and DOCX, we'd normally use specialized libraries
-      // But for simplicity in this demo, we'll just extract text with FileReader
       else {
         const reader = new FileReader();
         reader.onload = (e) => {
-          // In a real app, you would use a PDF/DOCX parser library here
-          // For demo, we'll just extract what we can
           const result = e.target?.result as string;
           let extractedText = "";
           
           try {
-            // Simple text extraction that works for some PDFs
             extractedText = result.replace(/[^\x20-\x7E]/g, " ").trim();
-            // Clean up multiple spaces
             extractedText = extractedText.replace(/\s+/g, " ");
           } catch (err) {
             console.error("Error extracting text:", err);
@@ -276,7 +268,6 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
             </AnimatePresence>
           )}
           
-          {/* Industry Selection */}
           <div className="mt-6">
             <div className="space-y-2">
               <Label htmlFor="industry" className="flex items-center gap-2">
@@ -292,17 +283,6 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
               </p>
             </div>
           </div>
-          
-          {/* Show resume text preview if available */}
-          {fileUploaded && resumeText && (
-            <div className="mt-6">
-              <Label htmlFor="resumePreview" className="block mb-2">Resume Text Preview</Label>
-              <div className="max-h-32 overflow-y-auto bg-muted/30 p-3 rounded-md text-sm font-mono">
-                {resumeText.substring(0, 300)}
-                {resumeText.length > 300 && "..."}
-              </div>
-            </div>
-          )}
           
           <motion.div 
             initial={{ opacity: 0 }}
