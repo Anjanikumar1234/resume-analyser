@@ -1,3 +1,4 @@
+
 import React from "react";
 import { motion } from "framer-motion";
 import AnimatedScore from "./AnimatedScore";
@@ -48,6 +49,7 @@ interface JobRecommendation {
 }
 
 const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
+  // Generate job recommendations based on score
   const getJobRecommendations = (): JobRecommendation[] => {
     const { overallScore } = data;
     
@@ -129,6 +131,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
   const jobRecommendations = getJobRecommendations();
   
   const handleDownload = () => {
+    // Create text content for the download
     const content = `
 Resume Analysis Results
 
@@ -166,6 +169,7 @@ Job Recommendations:
 ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}% match)\n  ${job.description}\n  Required Skills: ${job.skills.join(', ')}`).join('\n\n')}
     `;
     
+    // Create a blob and download link
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -180,6 +184,7 @@ ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}%
   };
   
   const handleShare = () => {
+    // Simple share functionality
     if (navigator.share) {
       navigator.share({
         title: 'My Resume Analysis Results',
@@ -189,6 +194,7 @@ ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}%
       .then(() => toast.success("Shared successfully!"))
       .catch((error) => toast.error("Error sharing: " + error));
     } else {
+      // Fallback for browsers that don't support the Web Share API
       navigator.clipboard.writeText(window.location.href)
         .then(() => toast.success("Link copied to clipboard!"))
         .catch(() => toast.error("Failed to copy link"));
@@ -272,6 +278,7 @@ ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}%
             />
           </div>
           
+          {/* New advanced scores */}
           {(data.atsCompatibilityScore || data.industryFitScore) && (
             <div className="mt-8 pt-8 border-t">
               <h3 className="text-xl font-bold mb-6">Advanced Analysis</h3>
@@ -301,6 +308,7 @@ ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}%
         </div>
       </motion.div>
       
+      {/* Tabbed Content for Analysis Results */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -317,11 +325,7 @@ ${jobRecommendations.map(job => `- ${job.title} at ${job.company} (${job.match}%
           
           <TabsContent value="general" className="space-y-6">
             <h3 className="text-2xl font-bold mb-6 gradient-text">Strengths & Areas to Improve</h3>
-            <StrengthsWeaknesses 
-              strengths={data.strengths} 
-              weaknesses={data.weaknesses} 
-              industry={data.industryAnalysis?.industry}
-            />
+            <StrengthsWeaknesses strengths={data.strengths} weaknesses={data.weaknesses} />
             
             <h3 className="text-2xl font-bold mt-12 mb-6 gradient-text">Improvement Recommendations</h3>
             <Suggestions suggestions={data.suggestions} />
