@@ -34,7 +34,6 @@ const SentenceImprover: React.FC<SentenceImproverProps> = ({
     try {
       const improved = await improveSentence(sentence, industry);
       setImprovedSentence(improved);
-      
       console.log("Improved sentence ready:", improved);
     } catch (error) {
       console.error("Error improving sentence:", error);

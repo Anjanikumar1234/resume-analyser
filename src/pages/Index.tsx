@@ -28,18 +28,14 @@ const Index = () => {
   const [analysisResults, setAnalysisResults] = useState<AnalysisData | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  // Store resume text to maintain consistent analysis
   const [resumeText, setResumeText] = useState<string>("");
-  // Track if user needs authentication
   const [needsAuth, setNeedsAuth] = useState(false);
   
-  // References for scrolling
   const uploadRef = useRef<HTMLDivElement>(null);
   const analysisRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // Check if user is logged in
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -48,26 +44,26 @@ const Index = () => {
   
   const handleResumeUpload = async (text: string, industry?: string) => {
     try {
-      setResumeText(text); // Store the resume text
+      setResumeText(text);
       setIsAnalyzing(true);
       setCurrentStep(2);
       
-      // Scroll to progress indicator
       if (progressRef.current) {
         progressRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       }
       
-      // Simulate step progression
       setTimeout(() => setCurrentStep(3), 1500);
       
-      // Analyze the resume with optional industry parameter
+      console.log("Analyzing resume with text length:", text.length);
+      console.log("Industry:", industry || "None specified");
+      
       const results = await analyzeResume(text, industry);
       
-      // Update state with results
+      console.log("Analysis complete. Results:", results);
+      
       setAnalysisResults(results);
       setCurrentStep(4);
       
-      // Only scroll to the analysis results after they're rendered
       setTimeout(() => {
         if (analysisRef.current) {
           analysisRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -78,8 +74,12 @@ const Index = () => {
     } catch (error) {
       console.error("Analysis error:", error);
       toast.error("Something went wrong with the analysis. Please try again.");
-    } finally {
       setIsAnalyzing(false);
+      setCurrentStep(1);
+    } finally {
+      if (!analysisResults) {
+        setIsAnalyzing(false);
+      }
     }
   };
   
@@ -109,7 +109,6 @@ const Index = () => {
       <AnimatedBackground />
       
       <div className="relative z-10">
-        {/* Navigation Bar */}
         <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-indigo-100 dark:border-indigo-900">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
@@ -119,7 +118,6 @@ const Index = () => {
                 </Link>
               </div>
               
-              {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center space-x-6">
                 <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
                   How It Works
@@ -153,7 +151,6 @@ const Index = () => {
                 )}
               </nav>
               
-              {/* Mobile Menu Button */}
               <div className="md:hidden">
                 <button 
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -165,7 +162,6 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Mobile Menu */}
           {isMenuOpen && (
             <motion.div 
               initial={{ opacity: 0, height: 0 }}
@@ -218,10 +214,8 @@ const Index = () => {
           )}
         </header>
 
-        {/* Hero Section */}
         <Hero />
 
-        {/* Resume Upload Section - Moved higher in the page */}
         <div id="upload" ref={uploadRef}>
           <ResumeUpload 
             onUpload={handleResumeUpload} 
@@ -230,7 +224,6 @@ const Index = () => {
           />
         </div>
         
-        {/* Authentication Dialog */}
         {needsAuth && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -266,26 +259,25 @@ const Index = () => {
           </motion.div>
         )}
         
-        {/* Progress Indicator (only show during analysis) */}
         {isAnalyzing && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="container max-w-3xl mx-auto px-4"
+            className="container max-w-3xl mx-auto px-4 py-8 bg-background/50 backdrop-blur-sm rounded-lg"
             ref={progressRef}
           >
+            <h3 className="text-2xl font-bold text-center mb-6">Analyzing Your Resume</h3>
             <ProgressIndicator currentStep={currentStep} steps={steps} />
           </motion.div>
         )}
         
-        {/* Analysis Results (only show when available) */}
         {analysisResults && currentStep === 4 && (
-          <div ref={analysisRef}>
+          <div ref={analysisRef} id="analysis-results" className="mt-8">
+            {console.log("Rendering analysis results component with data:", analysisResults)}
             <AnalysisResults data={analysisResults} />
           </div>
         )}
         
-        {/* How It Works Section */}
         <section id="how-it-works" className="container max-w-5xl mx-auto py-16 px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -320,10 +312,8 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Contact Section */}
         <ContactSection />
         
-        {/* Footer */}
         <footer className="bg-card border-t py-8 mt-16">
           <div className="container mx-auto px-4 text-center">
             <p className="text-muted-foreground text-sm">
