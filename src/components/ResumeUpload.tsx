@@ -253,25 +253,37 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex items-center justify-between bg-muted/30 p-6 rounded-lg border"
+                className="flex flex-col gap-3"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600 dark:text-green-400">
-                    <Check className="w-6 h-6" />
+                <motion.div className="flex items-center justify-between bg-muted/30 p-6 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600 dark:text-green-400">
+                      <Check className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-lg">Resume Uploaded Successfully</h3>
+                      <p className="text-sm text-muted-foreground">{fileName}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Resume Uploaded Successfully</h3>
-                    <p className="text-sm text-muted-foreground">{fileName}</p>
-                  </div>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={handleClearText}
-                  className="h-8 w-8"
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={handleClearText}
+                    className="h-8 w-8"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </motion.div>
+                
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="bg-muted/20 p-4 rounded-lg border border-dashed"
                 >
-                  <X className="w-5 h-5" />
-                </Button>
+                  <p className="text-sm text-muted-foreground">
+                    {resumeText.length} characters extracted from your resume. Click "Analyze Resume" to proceed.
+                  </p>
+                </motion.div>
               </motion.div>
             </AnimatePresence>
           )}
@@ -292,17 +304,6 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, onAuthNeeded, isL
               </p>
             </div>
           </div>
-          
-          {/* Show resume text preview if available */}
-          {fileUploaded && resumeText && (
-            <div className="mt-6">
-              <Label htmlFor="resumePreview" className="block mb-2">Resume Text Preview</Label>
-              <div className="max-h-32 overflow-y-auto bg-muted/30 p-3 rounded-md text-sm font-mono">
-                {resumeText.substring(0, 300)}
-                {resumeText.length > 300 && "..."}
-              </div>
-            </div>
-          )}
           
           <motion.div 
             initial={{ opacity: 0 }}

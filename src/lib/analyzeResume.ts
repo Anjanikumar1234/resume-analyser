@@ -34,140 +34,239 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   console.log("Analyzing resume text...", text.substring(0, 100) + "...");
   console.log("Industry specified:", industry || "None");
   
-  // Simulate a processing delay to make it feel more realistic
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  // Extract text contents and clean it up
+  let resumeContent = text.toLowerCase();
+  // Remove non-printable characters that might appear in PDF/DOCX extraction
+  resumeContent = resumeContent.replace(/[\x00-\x1F\x7F-\x9F]/g, " ");
   
-  // Extract text contents
-  const resumeContent = text.toLowerCase();
+  // 1. Check for education keywords - advanced detection
+  const educationTerms = [
+    'degree', 'university', 'college', 'bachelor', 'master', 'phd', 'diploma', 'graduate', 'certification', 'certificate',
+    'b.s.', 'b.a.', 'm.s.', 'm.a.', 'ph.d', 'mba', 'major', 'minor', 'gpa', 'cum laude', 'magna cum laude', 'summa cum laude'
+  ];
+  const educationMatches = educationTerms.filter(term => resumeContent.includes(term));
+  const hasEducation = educationMatches.length > 0;
+  // Score based on how many education terms found (more terms = better detail)
+  const educationScore = Math.min(100, 40 + (educationMatches.length * 10));
   
-  // Actually analyze the resume content
-  // 1. Check for education keywords
-  const educationTerms = ['degree', 'university', 'college', 'bachelor', 'master', 'phd', 'diploma', 'graduate', 'certification', 'certificate'];
-  const hasEducation = educationTerms.some(term => resumeContent.includes(term));
-  const educationScore = hasEducation ? 85 : 45;
-  
-  // 2. Check for experience keywords
-  const experienceTerms = ['experience', 'work', 'job', 'position', 'role', 'company', 'employer', 'client'];
-  const hasExperience = experienceTerms.some(term => resumeContent.includes(term));
-  const experienceScore = hasExperience ? 90 : 50;
+  // 2. Check for experience keywords - advanced detection
+  const experienceTerms = [
+    'experience', 'work', 'job', 'position', 'role', 'company', 'employer', 'client',
+    'responsible for', 'lead', 'manage', 'develop', 'create', 'implement', 'coordinator', 'specialist',
+    'analyst', 'assistant', 'director', 'supervisor', 'manager', 'head', 'chief', 'senior', 'junior',
+    'intern', 'consultant', 'contractor', 'freelance'
+  ];
+  const experienceMatches = experienceTerms.filter(term => resumeContent.includes(term));
+  const hasExperience = experienceMatches.length > 0;
+  // Score based on how many experience terms found
+  const experienceScore = Math.min(100, 40 + (experienceMatches.length * 5));
   
   // 3. Check for skills
-  const skillsTerms = ['skill', 'proficient', 'knowledge', 'expertise', 'competent', 'capable', 'familiar', 'advanced'];
-  const hasSkills = skillsTerms.some(term => resumeContent.includes(term));
-  const skillsScore = hasSkills ? 80 : 60;
+  const skillsTerms = [
+    'skill', 'proficient', 'knowledge', 'expertise', 'competent', 'capable', 'familiar', 'advanced', 
+    'programming', 'language', 'software', 'tool', 'framework', 'platform', 'system', 'methodology',
+    'certified', 'trained', 'experienced in', 'proficiency', 'fluent', 'excel at'
+  ];
+  const skillMatches = skillsTerms.filter(term => resumeContent.includes(term));
+  const hasSkills = skillMatches.length > 0;
+  // Score based on how many skill terms found
+  const skillsScore = Math.min(100, 50 + (skillMatches.length * 8));
   
-  // 4. Check for achievements
-  const achievementTerms = ['achieved', 'led', 'increased', 'improved', 'reduced', 'created', 'developed', 'managed', 'organized'];
-  const hasAchievements = achievementTerms.some(term => resumeContent.includes(term));
-  const achievementsScore = hasAchievements ? 95 : 55;
+  // 4. Check for achievements with quantifiable results
+  const achievementTerms = [
+    'achieved', 'led', 'increased', 'improved', 'reduced', 'created', 'developed', 'managed', 'organized',
+    'generated', 'delivered', 'produced', 'launched', 'implemented', 'established', 'streamlined', 'optimized'
+  ];
+  const quantifiableTerms = [
+    '%', 'percent', 'increased by', 'reduced by', 'million', 'thousand', 'grew', 'decreased', 'saved',
+    'revenue', 'profit', 'cost', 'budget', 'roi', 'kpi', 'metric', 'target', 'goal', 'rate', 'average',
+    '$', '€', '£', '¥', 'dollar', 'euro'
+  ];
   
-  // 5. Check for quantifiable results
-  const quantifiableTerms = ['%', 'percent', 'increased by', 'reduced by', 'million', 'thousand', 'grew', 'decreased'];
-  const hasQuantifiableResults = quantifiableTerms.some(term => resumeContent.includes(term));
-  const quantifiableScore = hasQuantifiableResults ? 90 : 50;
+  const achievementMatches = achievementTerms.filter(term => resumeContent.includes(term));
+  const quantifiableMatches = quantifiableTerms.filter(term => resumeContent.includes(term));
   
-  // 6. Check for contact information
-  const contactTerms = ['email', 'phone', 'address', 'linkedin', 'github', 'portfolio', 'website'];
-  const hasContactInfo = contactTerms.some(term => resumeContent.includes(term));
-  const contactScore = hasContactInfo ? 100 : 40;
+  const hasAchievements = achievementMatches.length > 0;
+  const hasQuantifiableResults = quantifiableMatches.length > 0;
   
-  // 7. Check readability
-  const wordCount = text.split(/\s+/).length;
-  const sentenceCount = text.split(/[.!?]+/).length;
-  const avgWordLength = text.length / wordCount;
-  const wordsPerSentence = wordCount / sentenceCount;
+  // Better score if both achievement words and quantifiable results are present
+  const achievementsScore = Math.min(100, 
+    40 + (achievementMatches.length * 5) + (quantifiableMatches.length * 10));
   
-  // Ideal readability: 15-20 words per sentence, avg word length 4-6 characters
+  // 5. Check for contact information - advanced detection with regex
+  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+  const phoneRegex = /(\+\d{1,3}[\s.-])?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g;
+  const linkedinRegex = /linkedin\.com\/in\/[a-zA-Z0-9_-]+/g;
+  
+  const hasEmail = emailRegex.test(resumeContent);
+  const hasPhone = phoneRegex.test(resumeContent);
+  const hasLinkedin = linkedinRegex.test(resumeContent);
+  
+  // Calculate contact score based on which contact elements are present
+  const contactScore = Math.min(100, 
+    (hasEmail ? 40 : 0) + 
+    (hasPhone ? 30 : 0) + 
+    (hasLinkedin ? 30 : 0));
+  
+  // 6. Analyze readability
+  // Split text into words, sentences, and paragraphs
+  const words = text.match(/\b\w+\b/g) || [];
+  const sentences = text.split(/[.!?]+/).filter(Boolean);
+  const paragraphs = text.split(/\n\s*\n/).filter(Boolean);
+  
+  const wordCount = words.length;
+  const sentenceCount = sentences.length;
+  const avgWordLength = words.join('').length / wordCount;
+  const wordsPerSentence = wordCount / Math.max(1, sentenceCount);
+  const paragraphCount = paragraphs.length;
+  
+  // Flesch-Kincaid inspired formula: more paragraphs and reasonable sentence length = better
+  // Ideal readability: 15-20 words per sentence, multiple paragraphs, avg word length 4-6 characters
   const readabilityScore = Math.min(100, Math.max(40, 
-    100 - Math.abs(wordsPerSentence - 17) * 3 - 
-    Math.abs(avgWordLength - 5) * 5));
+    80 - Math.abs(wordsPerSentence - 17) * 2 - 
+    Math.abs(avgWordLength - 5) * 3 +
+    Math.min(20, paragraphCount * 2)));
   
-  // 8. Check for industry-specific keywords based on selected industry
-  let industryKeywords: string[] = [];
+  // 7. Check for industry-specific keywords based on selected industry
+  const industryKeywords: Record<string, string[]> = {
+    technology: [
+      'software', 'development', 'programming', 'code', 'javascript', 'python', 'java', 'c++', 'react', 
+      'angular', 'vue', 'node', 'web', 'app', 'mobile', 'cloud', 'aws', 'azure', 'database', 'sql', 
+      'nosql', 'api', 'rest', 'graphql', 'git', 'agile', 'scrum', 'devops', 'ci/cd', 'cybersecurity',
+      'machine learning', 'ai', 'data science', 'blockchain', 'frontend', 'backend', 'fullstack'
+    ],
+    healthcare: [
+      'patient', 'care', 'medical', 'clinical', 'health', 'hospital', 'doctor', 'nurse', 'therapy', 
+      'treatment', 'diagnosis', 'pharmaceutical', 'medicine', 'healthcare', 'ehr', 'emr', 'hipaa',
+      'biology', 'anatomy', 'physiology', 'radiology', 'surgery', 'emergency', 'pharmacy', 'laboratory',
+      'diagnostic', 'therapeutic', 'rehabilitation', 'clinical trials', 'medical record'
+    ],
+    finance: [
+      'financial', 'accounting', 'audit', 'tax', 'investment', 'banking', 'loan', 'credit', 'mortgage', 
+      'finance', 'portfolio', 'budget', 'revenue', 'profit', 'asset', 'liability', 'capital', 'equity', 
+      'stock', 'bond', 'security', 'risk', 'compliance', 'regulatory', 'fintech', 'analysis', 'forecast',
+      'valuation', 'merger', 'acquisition', 'hedge fund', 'private equity', 'trading', 'wealth management'
+    ],
+    marketing: [
+      'marketing', 'brand', 'advertising', 'campaign', 'social media', 'digital', 'seo', 'ppc', 'content', 
+      'strategy', 'analytics', 'target', 'market', 'audience', 'consumer', 'customer', 'conversion', 
+      'engagement', 'roi', 'ctr', 'cpa', 'cpc', 'funnel', 'lead generation', 'email marketing', 'crm',
+      'affiliate', 'influencer', 'viral', 'growth hacking', 'marketing automation', 'a/b testing'
+    ],
+    education: [
+      'education', 'teaching', 'learning', 'student', 'curriculum', 'instruction', 'classroom', 'school', 
+      'college', 'university', 'course', 'professor', 'teacher', 'faculty', 'academic', 'assessment', 
+      'pedagogy', 'e-learning', 'lesson plan', 'educational technology', 'distance learning', 'tutoring',
+      'educational psychology', 'special education', 'higher education', 'k-12', 'esl', 'stem'
+    ],
+    general: [
+      'professional', 'experience', 'skill', 'qualified', 'knowledge', 'leadership', 'management', 
+      'communication', 'teamwork', 'project', 'problem-solving', 'detail-oriented', 'analytical',
+      'strategic', 'planning', 'organization', 'time management', 'adaptability', 'flexibility',
+      'creative', 'innovative', 'resource', 'efficient', 'productive', 'proactive'
+    ]
+  };
+  
+  let selectedIndustryKeywords = industryKeywords.general;
   let industryFitScore = 50;
   
-  if (industry) {
-    switch(industry) {
-      case 'technology':
-        industryKeywords = ['software', 'development', 'programming', 'code', 'javascript', 'python', 'java', 'c++', 'react', 'angular', 'vue', 'node', 'web', 'app', 'mobile', 'cloud', 'aws', 'azure', 'database', 'sql', 'nosql', 'api', 'rest', 'graphql', 'git', 'agile', 'scrum', 'devops', 'ci/cd'];
-        break;
-      case 'healthcare':
-        industryKeywords = ['patient', 'care', 'medical', 'clinical', 'health', 'hospital', 'doctor', 'nurse', 'therapy', 'treatment', 'diagnosis', 'pharmaceutical', 'medicine', 'healthcare', 'ehr', 'emr', 'hipaa'];
-        break;
-      case 'finance':
-        industryKeywords = ['financial', 'accounting', 'audit', 'tax', 'investment', 'banking', 'loan', 'credit', 'mortgage', 'finance', 'portfolio', 'budget', 'revenue', 'profit', 'asset', 'liability', 'capital', 'equity', 'stock', 'bond', 'security', 'risk', 'compliance'];
-        break;
-      case 'marketing':
-        industryKeywords = ['marketing', 'brand', 'advertising', 'campaign', 'social media', 'digital', 'seo', 'ppc', 'content', 'strategy', 'analytics', 'target', 'market', 'audience', 'consumer', 'customer', 'conversion', 'engagement', 'roi', 'ctr', 'cpa', 'cpc'];
-        break;
-      case 'education':
-        industryKeywords = ['education', 'teaching', 'learning', 'student', 'curriculum', 'instruction', 'classroom', 'school', 'college', 'university', 'course', 'professor', 'teacher', 'faculty', 'academic', 'assessment', 'pedagogy', 'e-learning'];
-        break;
-      default:
-        industryKeywords = ['professional', 'experience', 'skill', 'qualified', 'knowledge', 'leadership', 'management', 'communication', 'teamwork', 'project'];
-    }
+  if (industry && industryKeywords[industry as keyof typeof industryKeywords]) {
+    selectedIndustryKeywords = industryKeywords[industry as keyof typeof industryKeywords];
     
     // Calculate how many of these keywords are present in the resume
-    const presentKeywords = industryKeywords.filter(keyword => resumeContent.includes(keyword.toLowerCase()));
-    industryFitScore = Math.min(100, Math.max(40, Math.round((presentKeywords.length / industryKeywords.length) * 100)));
+    const presentKeywords = selectedIndustryKeywords.filter(keyword => 
+      resumeContent.includes(keyword.toLowerCase())
+    );
+    
+    industryFitScore = Math.min(100, Math.max(40, 
+      Math.round((presentKeywords.length / selectedIndustryKeywords.length) * 100)
+    ));
   }
   
-  // 9. Check ATS compatibility
+  // 8. Check ATS compatibility
   const atsPotentialIssues = [];
   
-  if (text.length < 300) {
+  if (wordCount < 300) {
     atsPotentialIssues.push("Resume is too short for effective ATS scanning");
   }
   
   if (!hasEducation) {
-    atsPotentialIssues.push("Education section may be missing");
+    atsPotentialIssues.push("Education section may be missing or not clearly identified");
   }
   
   if (!hasExperience) {
-    atsPotentialIssues.push("Work experience section may be missing");
+    atsPotentialIssues.push("Work experience section may be missing or not clearly formatted");
   }
   
-  if (!hasContactInfo) {
+  if (contactScore < 70) {
     atsPotentialIssues.push("Contact information may be missing or not clearly formatted");
   }
   
   // Common formatting issues that cause ATS problems
   const potentialFormattingIssues = [];
   
-  if (text.includes("•") || text.includes("►") || text.includes("→") || text.includes("✓")) {
-    potentialFormattingIssues.push("Special characters like bullets may cause parsing issues");
+  // Check for potentially problematic characters
+  const problematicChars = ['•', '►', '→', '✓', '|', '*', '№', '©', '®', '™'];
+  const foundProblematicChars = problematicChars.filter(char => text.includes(char));
+  
+  if (foundProblematicChars.length > 0) {
+    potentialFormattingIssues.push(`Special characters like ${foundProblematicChars.join(', ')} may cause ATS parsing issues`);
   }
   
-  if (text.includes("|") || text.includes("*")) {
-    potentialFormattingIssues.push("Divider characters may cause formatting issues");
+  // Check for potential tables (sequence of spaces/tabs)
+  if (/(\s{3,}|\t{2,})/.test(text)) {
+    potentialFormattingIssues.push("Text alignment using spaces or tabs may be interpreted as tables by ATS systems");
   }
   
-  // Calculate overall scores
-  const keywordsScore = Math.round((hasEducation ? 1 : 0) * 0.2 * 100 + 
-                               (hasExperience ? 1 : 0) * 0.3 * 100 + 
-                               (hasSkills ? 1 : 0) * 0.3 * 100 + 
-                               (hasAchievements ? 1 : 0) * 0.2 * 100);
+  // Check for potential headers/footers
+  const lines = text.split('\n');
+  if (lines.length > 5) {
+    const firstLines = lines.slice(0, 3).join(' ').toLowerCase();
+    const lastLines = lines.slice(-3).join(' ').toLowerCase();
+    
+    if (firstLines.includes('page') || lastLines.includes('page')) {
+      potentialFormattingIssues.push("Headers or footers with page numbers detected which can confuse ATS systems");
+    }
+  }
   
-  const atsCompatibilityScore = Math.max(40, 100 - (atsPotentialIssues.length * 15) - (potentialFormattingIssues.length * 10));
+  // Calculate overall keywords score - weighting more important elements higher
+  const keywordsScore = Math.round(
+    (educationScore * 0.15) + 
+    (experienceScore * 0.35) + 
+    (skillsScore * 0.3) + 
+    (achievementsScore * 0.2)
+  );
   
-  // Calculate relevance score
-  const relevanceScore = Math.round((experienceScore * 0.4) + 
-                                (educationScore * 0.2) + 
-                                (skillsScore * 0.3) + 
-                                (quantifiableScore * 0.1));
+  // Calculate ATS compatibility score based on issues found
+  const atsCompatibilityScore = Math.max(40, 100 - 
+    (atsPotentialIssues.length * 10) - 
+    (potentialFormattingIssues.length * 8)
+  );
   
-  // Calculate overall score
-  const overallScore = Math.round((readabilityScore * 0.2) + 
-                              (relevanceScore * 0.3) + 
-                              (keywordsScore * 0.2) + 
-                              (atsCompatibilityScore * 0.2) + 
-                              (industryFitScore * 0.1));
+  // Calculate relevance score based on presence of important resume elements
+  const relevanceScore = Math.round(
+    (experienceScore * 0.4) + 
+    (educationScore * 0.15) + 
+    (skillsScore * 0.25) + 
+    (achievementsScore * 0.2)
+  );
+  
+  // Calculate overall score - weighted average of all component scores
+  const overallScore = Math.round(
+    (readabilityScore * 0.15) + 
+    (relevanceScore * 0.25) + 
+    (keywordsScore * 0.2) + 
+    (atsCompatibilityScore * 0.25) + 
+    (industryFitScore * 0.15)
+  );
   
   // Create strengths based on actual resume content
   const strengths = [];
+  let strengthId = 1;
+  
   if (hasEducation) {
     strengths.push({
-      id: "strength-1",
+      id: `strength-${strengthId++}`,
       text: "Strong educational background",
       impact: "This establishes your academic qualifications for the role."
     });
@@ -175,7 +274,7 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (hasExperience) {
     strengths.push({
-      id: "strength-2",
+      id: `strength-${strengthId++}`,
       text: "Clear professional experience",
       impact: "This demonstrates your relevant work history to employers."
     });
@@ -183,7 +282,7 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (hasSkills) {
     strengths.push({
-      id: "strength-3",
+      id: `strength-${strengthId++}`,
       text: "Well-defined skill set",
       impact: "This highlights your capabilities that match job requirements."
     });
@@ -191,7 +290,7 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (hasAchievements) {
     strengths.push({
-      id: "strength-4",
+      id: `strength-${strengthId++}`,
       text: "Achievement-focused content",
       impact: "This shows your ability to deliver results, which employers value highly."
     });
@@ -199,25 +298,35 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (hasQuantifiableResults) {
     strengths.push({
-      id: "strength-5",
+      id: `strength-${strengthId++}`,
       text: "Quantified accomplishments",
       impact: "This provides concrete evidence of your contributions and impact."
     });
   }
   
-  if (hasContactInfo) {
+  if (contactScore > 70) {
     strengths.push({
-      id: "strength-6",
+      id: `strength-${strengthId++}`,
       text: "Clear contact information",
       impact: "This makes it easy for employers to reach out to you."
     });
   }
   
+  if (readabilityScore > 70) {
+    strengths.push({
+      id: `strength-${strengthId++}`,
+      text: "Good readability and structure",
+      impact: "This helps hiring managers quickly scan and understand your resume."
+    });
+  }
+  
   // Create weaknesses based on actual resume content
   const weaknesses = [];
+  let weaknessId = 1;
+  
   if (!hasEducation) {
     weaknesses.push({
-      id: "weakness-1",
+      id: `weakness-${weaknessId++}`,
       text: "Missing or unclear education section",
       suggestion: "Add a dedicated education section with your degrees, institutions, and graduation dates."
     });
@@ -225,7 +334,7 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (!hasExperience) {
     weaknesses.push({
-      id: "weakness-2",
+      id: `weakness-${weaknessId++}`,
       text: "Work experience not clearly defined",
       suggestion: "Structure your work experience with company names, job titles, dates, and bullet points for responsibilities."
     });
@@ -233,7 +342,7 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (!hasSkills) {
     weaknesses.push({
-      id: "weakness-3",
+      id: `weakness-${weaknessId++}`,
       text: "Skills section could be improved",
       suggestion: "Add a dedicated skills section with relevant technical and soft skills for your target role."
     });
@@ -241,7 +350,7 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (!hasAchievements) {
     weaknesses.push({
-      id: "weakness-4",
+      id: `weakness-${weaknessId++}`,
       text: "Lacks achievement-focused content",
       suggestion: "Reframe job duties as accomplishments by describing problems solved and results achieved."
     });
@@ -249,7 +358,7 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (!hasQuantifiableResults) {
     weaknesses.push({
-      id: "weakness-5",
+      id: `weakness-${weaknessId++}`,
       text: "Achievements not quantified",
       suggestion: "Add numbers, percentages, and metrics to demonstrate the scale and impact of your work."
     });
@@ -257,15 +366,23 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
   
   if (wordCount > 700) {
     weaknesses.push({
-      id: "weakness-6",
+      id: `weakness-${weaknessId++}`,
       text: "Resume may be too verbose",
       suggestion: "Consider condensing content to make it more focused and scannable."
     });
   } else if (wordCount < 300) {
     weaknesses.push({
-      id: "weakness-7",
+      id: `weakness-${weaknessId++}`,
       text: "Resume appears too short",
       suggestion: "Add more detail about your experience, skills, and achievements."
+    });
+  }
+  
+  if (readabilityScore < 70) {
+    weaknesses.push({
+      id: `weakness-${weaknessId++}`,
+      text: "Readability could be improved",
+      suggestion: "Use shorter sentences, bullet points, and clear section headings to improve scannability."
     });
   }
   
@@ -341,62 +458,25 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
     priority: "medium" as "high" | "medium" | "low"
   });
   
-  // Analyze missing keywords based on industry
-  const missingKeywords = [];
-  const overusedTerms = [];
+  // Generate keyword suggestions
+  // Find missing keywords based on industry
+  const missingIndustryKeywords = selectedIndustryKeywords.filter(keyword => 
+    !resumeContent.includes(keyword.toLowerCase())
+  ).slice(0, 5);
   
   // Find potentially overused generic terms
   const genericTerms = ['team player', 'hard worker', 'detail-oriented', 'self-starter', 'motivated', 'passionate'];
-  genericTerms.forEach(term => {
+  const overusedTerms = genericTerms.filter(term => {
     const regex = new RegExp(term, 'gi');
     const matches = text.match(regex);
-    if (matches && matches.length > 2) {
-      overusedTerms.push(term);
-    }
+    return matches && matches.length > 2;
   });
   
-  // Find missing industry keywords
-  if (industry && industryKeywords.length > 0) {
-    missingKeywords.push(...industryKeywords.filter(keyword => 
-      !resumeContent.includes(keyword.toLowerCase())
-    ).slice(0, 5)); // Just show top 5 missing keywords
-  }
-  
-  // Generate industry analysis
-  const selectedIndustry = industry || "general";
-  
-  // Identify skills mentioned in the resume
-  const mentionedSkills: string[] = [];
-  
-  if (industry && industryKeywords.length > 0) {
-    industryKeywords.forEach(keyword => {
-      if (resumeContent.includes(keyword.toLowerCase())) {
-        mentionedSkills.push(keyword);
-      }
-    });
-  }
-  
-  // Generate industry analysis
-  const industryAnalysis = {
-    industry: selectedIndustry,
-    relevantSkills: mentionedSkills.slice(0, 5),
-    missingSkills: missingKeywords.slice(0, 5),
-    industryTrends: getIndustryTrends(selectedIndustry)
-  };
-  
-  // Generate ATS analysis
-  const atsAnalysis = {
-    isParseable: atsCompatibilityScore > 60,
-    missingKeywords: missingKeywords.slice(0, 5),
-    formatIssues: potentialFormattingIssues.concat(atsPotentialIssues).slice(0, 3),
-    overallCompatibility: atsCompatibilityScore > 75 ? "high" : atsCompatibilityScore > 60 ? "medium" : "low" as "high" | "medium" | "low"
-  };
-  
-  // Generate keyword suggestions
+  // Generate keyword suggestions in categories
   const keywordSuggestions = [
     {
       category: "Technical Skills",
-      missing: missingKeywords.filter(keyword => isSkill(keyword)).slice(0, 5),
+      missing: missingIndustryKeywords.filter(keyword => isSkill(keyword)).slice(0, 5),
       overused: overusedTerms.filter(term => term.includes("skill") || term.includes("proficient")).slice(0, 3)
     },
     {
@@ -406,10 +486,31 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
     },
     {
       category: "Industry Terms",
-      missing: missingKeywords.filter(keyword => !isSkill(keyword)).slice(0, 5),
+      missing: missingIndustryKeywords.filter(keyword => !isSkill(keyword)).slice(0, 5),
       overused: []
     }
   ];
+  
+  // Generate industry analysis
+  const selectedIndustryName = industry || "general";
+  
+  // Build industry analysis
+  const industryAnalysis = {
+    industry: selectedIndustryName,
+    relevantSkills: selectedIndustryKeywords.filter(keyword => 
+      resumeContent.includes(keyword.toLowerCase())
+    ).slice(0, 5),
+    missingSkills: missingIndustryKeywords.slice(0, 5),
+    industryTrends: getIndustryTrends(selectedIndustryName)
+  };
+  
+  // Generate ATS analysis
+  const atsAnalysis = {
+    isParseable: atsCompatibilityScore > 60,
+    missingKeywords: missingIndustryKeywords.slice(0, 5),
+    formatIssues: [...potentialFormattingIssues, ...atsPotentialIssues].slice(0, 3),
+    overallCompatibility: atsCompatibilityScore > 75 ? "high" : atsCompatibilityScore > 60 ? "medium" : "low" as "high" | "medium" | "low"
+  };
   
   // Ensure we have valid strengths and weaknesses
   const validStrengths = strengths.length > 0 ? strengths : [
@@ -447,7 +548,7 @@ export const analyzeResume = async (text: string, industry?: string): Promise<An
 
 // Helper function to determine if a keyword is a skill
 function isSkill(keyword: string): boolean {
-  const skillKeywords = ['programming', 'development', 'design', 'management', 'analysis', 'skill', 'proficient', 'certified'];
+  const skillKeywords = ['programming', 'development', 'design', 'management', 'analysis', 'skill', 'proficient', 'certified', 'tool', 'software', 'platform', 'language', 'framework'];
   return skillKeywords.some(skill => keyword.toLowerCase().includes(skill));
 }
 
@@ -498,3 +599,84 @@ function getIndustryTrends(industry: string): string[] {
       ];
   }
 }
+
+// New helper function to improve resume sentences
+export const improveSentence = async (sentence: string, industry?: string): Promise<string> => {
+  if (!sentence || sentence.trim().length === 0) {
+    return "Please provide a valid sentence to improve.";
+  }
+
+  try {
+    // For demonstration, generate a more improved version of the sentence
+    // In a real implementation, you would use an actual AI model API call
+    
+    // Sample improvements based on common resume issues
+    const wordCount = sentence.split(/\s+/).length;
+    let improved = sentence;
+    
+    // Replace passive voice with active voice
+    improved = improved.replace(/was (responsible for|tasked with)/gi, "managed");
+    improved = improved.replace(/was (involved in|part of)/gi, "contributed to");
+    
+    // Add action verbs at the beginning if none present
+    const actionVerbs = ["Spearheaded", "Implemented", "Delivered", "Orchestrated", "Developed", "Managed", "Achieved"];
+    const startsWithActionVerb = /^(Led|Managed|Created|Developed|Implemented|Achieved|Increased|Reduced|Improved)/i.test(improved);
+    
+    if (!startsWithActionVerb) {
+      // Choose a contextually appropriate action verb
+      let actionVerb = "Led";
+      
+      if (improved.toLowerCase().includes("develop") || improved.toLowerCase().includes("creat")) {
+        actionVerb = "Developed";
+      } else if (improved.toLowerCase().includes("manage") || improved.toLowerCase().includes("lead")) {
+        actionVerb = "Managed";
+      } else if (improved.toLowerCase().includes("improv") || improved.toLowerCase().includes("enhanc")) {
+        actionVerb = "Improved";
+      } else {
+        actionVerb = actionVerbs[Math.floor(Math.random() * actionVerbs.length)];
+      }
+      
+      improved = `${actionVerb} ${improved.charAt(0).toLowerCase() + improved.slice(1)}`;
+    }
+    
+    // Add quantifiable results if none present
+    const hasNumbers = /\d+/.test(improved);
+    const hasPercentage = /%/.test(improved);
+    
+    if (!hasNumbers && !hasPercentage && wordCount > 5) {
+      // Add a random quantifiable result
+      const quantifiers = [
+        "resulting in 20% efficiency improvement",
+        "increasing team productivity by 25%",
+        "reducing costs by 15%",
+        "saving over 10 hours per week",
+        "achieving 30% faster delivery"
+      ];
+      
+      improved += `, ${quantifiers[Math.floor(Math.random() * quantifiers.length)]}`;
+    }
+    
+    // Add industry-specific terminology if industry is provided
+    if (industry) {
+      const industryTerms: Record<string, string[]> = {
+        technology: ["agile methodology", "DevOps practices", "cloud infrastructure", "cross-functional teams"],
+        healthcare: ["patient outcomes", "care protocols", "clinical workflows", "healthcare regulations"],
+        finance: ["financial analytics", "regulatory compliance", "risk management", "investment strategies"],
+        marketing: ["conversion rates", "customer acquisition", "brand positioning", "market segmentation"],
+        education: ["learning outcomes", "curriculum development", "student engagement", "educational assessments"]
+      };
+      
+      const terms = industryTerms[industry as keyof typeof industryTerms] || [];
+      
+      if (terms.length > 0 && !terms.some(term => improved.toLowerCase().includes(term))) {
+        const selectedTerm = terms[Math.floor(Math.random() * terms.length)];
+        improved += ` utilizing ${selectedTerm}`;
+      }
+    }
+    
+    return improved;
+  } catch (error) {
+    console.error("Error improving sentence:", error);
+    return sentence; // Return original sentence if there's an error
+  }
+};
